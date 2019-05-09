@@ -4,6 +4,7 @@ import (
 	"loggo"
 	"rbuffergo"
 	"socketgo"
+	"texas"
 )
 
 func main() {
@@ -16,4 +17,6 @@ func main() {
 
 	c := socketgo.LuConfig{}
 	socketgo.New(&c)
+
+	texas.Load("aaa")
 }

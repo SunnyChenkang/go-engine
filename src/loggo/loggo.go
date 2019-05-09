@@ -24,6 +24,10 @@ type Config struct {
 var gConfig Config
 
 func Ini(config Config) {
+	if gConfig.MaxDay == 0 {
+		fmt.Println("loggo had ini before " + gConfig.Prefix)
+		return
+	}
 	gConfig = config
 	if strings.Contains(gConfig.Prefix, "_") {
 		panic("log prefix shout not contain _")
