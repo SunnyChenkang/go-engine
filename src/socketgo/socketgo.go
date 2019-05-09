@@ -3,7 +3,7 @@ package socketgo
 import (
 	"errors"
 	"fmt"
-	"github.com/esrrhs/rbuffergo"
+	"github.com/esrrhs/go-engine/src/rbuffergo"
 	"net"
 	"time"
 )
