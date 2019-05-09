@@ -24,7 +24,7 @@ type Config struct {
 var gConfig Config
 
 func Ini(config Config) {
-	if gConfig.MaxDay == 0 {
+	if gConfig.MaxDay != 0 {
 		fmt.Println("loggo had ini before " + gConfig.Prefix)
 		return
 	}
