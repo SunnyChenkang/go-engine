@@ -18,5 +18,9 @@ func main() {
 	c := socketgo.LuConfig{}
 	socketgo.New(&c)
 
-	texas.Load("aaa")
+	d := texas.StrToBytes("黑3,梅A,方10,鬼")
+	loggo.Info("%v", texas.BytesToStr(d))
+
+	texas.Load()
+
 }
