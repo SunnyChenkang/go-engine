@@ -65,6 +65,7 @@ func loadProbility(i int, file string) {
 			break
 		}
 
+		line = strings.Trim(line, "\n")
 		params := strings.Split(line, " ")
 
 		key, _ := strconv.ParseInt(params[0], 10, 64)
@@ -107,6 +108,7 @@ func LoadNormal(file string) {
 			break
 		}
 
+		line = strings.Trim(line, "\n")
 		params := strings.Split(line, " ")
 
 		key, _ := strconv.ParseInt(params[0], 10, 64)
@@ -143,6 +145,7 @@ func LoadColor(file string) {
 			break
 		}
 
+		line = strings.Trim(line, "\n")
 		params := strings.Split(line, " ")
 
 		key, _ := strconv.ParseInt(params[0], 10, 64)
@@ -206,107 +209,17 @@ const (
 	PokeValue_GUI = 8
 )
 
-func StrToByteValue(str string) int8 {
+const (
+	TEXAS_CARD_TYPE_GAOPAI          = 1  //高牌
+	TEXAS_CARD_TYPE_DUIZI           = 2  //对子
+	TEXAS_CARD_TYPE_LIANGDUI        = 3  //两对
+	TEXAS_CARD_TYPE_SANTIAO         = 4  //三条
+	TEXAS_CARD_TYPE_SHUNZI          = 5  //顺子
+	TEXAS_CARD_TYPE_TONGHUA         = 6  //同花
+	TEXAS_CARD_TYPE_HULU            = 7  //葫芦
+	TEXAS_CARD_TYPE_SITIAO          = 8  //四条
+	TEXAS_CARD_TYPE_TONGHUASHUN     = 9  //同花顺
+	TEXAS_CARD_TYPE_KINGTONGHUASHUN = 10 //皇家同花顺
+)
 
-	if str == "A" {
-		return PokeValue_A
-	} else if str == "K" {
-		return PokeValue_K
-	} else if str == "Q" {
-		return PokeValue_Q
-	} else if str == "J" {
-		return PokeValue_J
-	} else {
-		ret, _ := strconv.ParseInt(str, 10, 8)
-		return int8(ret)
-	}
-}
-
-func StrToBytes(str string) []int8 {
-	var ret []int8
-
-	if len(str) == 0 {
-		return ret
-	}
-
-	strs := strings.Split(str, ",")
-	for _, s := range strs {
-		ret = append(ret, StrToByte(s))
-	}
-
-	return ret
-}
-
-func StrToByte(str string) int8 {
-	if strings.HasPrefix(str, "方") {
-		p := Poke{PokeColor_FANG, StrToByteValue(string([]rune(str)[1:]))}
-		return p.ToByte()
-	} else if strings.HasPrefix(str, "梅") {
-		p := Poke{PokeColor_MEI, StrToByteValue(string([]rune(str)[1:]))}
-		return p.ToByte()
-	} else if strings.HasPrefix(str, "红") {
-		p := Poke{PokeColor_HONG, StrToByteValue(string([]rune(str)[1:]))}
-		return p.ToByte()
-	} else if strings.HasPrefix(str, "黑") {
-		p := Poke{PokeColor_HEI, StrToByteValue(string([]rune(str)[1:]))}
-		return p.ToByte()
-	} else if strings.HasPrefix(str, "鬼") {
-		p := Poke{PokeColor_GUI, PokeValue_GUI}
-		return p.ToByte()
-	}
-
-	return 0
-}
-
-func BytesToStr(bytes []int8) string {
-	return KeyToStr(GenCardBind(bytes))
-}
-
-func GenCardBind(bytes []int8) int64 {
-	var ret int64
-
-	for _, b := range bytes {
-		ret = ret*100 + int64(b)
-	}
-
-	return ret
-}
-
-func KeyToPoke(k int64) []Poke {
-
-	var cs []Poke
-
-	if k > 1000000000000 {
-		cs = append(cs, NewPoke((int8)(k%100000000000000/1000000000000)))
-	}
-	if k > 10000000000 {
-		cs = append(cs, NewPoke((int8)(k%1000000000000/10000000000)))
-	}
-	if k > 100000000 {
-		cs = append(cs, NewPoke((int8)(k%10000000000/100000000)))
-	}
-	if k > 1000000 {
-		cs = append(cs, NewPoke((int8)(k%100000000/1000000)))
-	}
-	if k > 10000 {
-		cs = append(cs, NewPoke((int8)(k%1000000/10000)))
-	}
-	if k > 100 {
-		cs = append(cs, NewPoke((int8)(k%10000/100)))
-	}
-	if k > 1 {
-		cs = append(cs, NewPoke((int8)(k%100/1)))
-	}
-	return cs
-}
-
-func KeyToStr(key int64) string {
-	var ret string
-
-	cs := KeyToPoke(key)
-	for _, cs := range cs {
-		ret += cs.ToString()
-	}
-
-	return ret
-}
+var GUI = Poke{PokeColor_GUI, PokeValue_GUI}

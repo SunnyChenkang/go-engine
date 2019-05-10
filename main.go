@@ -23,4 +23,15 @@ func main() {
 
 	texas.Load()
 
+	max, trans := texas.GetMax("黑3,梅A,梅K,方10,方9,鬼,红2")
+	loggo.Info("max %v, trans %v", max, texas.BytesToStr(trans))
+
+	max, trans = texas.GetMax("黑3,梅Q,梅K,方10,方9,方8,红J")
+	loggo.Info("max %v, trans %v", max, texas.BytesToStr(trans))
+
+	max, trans = texas.GetMax("方2,方Q,梅K,方10,方9,方8,红J")
+	loggo.Info("max %v, trans %v", max, texas.BytesToStr(trans))
+
+	max, trans = texas.GetMax("方J,方Q,梅K,方10,方9,方8,红J")
+	loggo.Info("max %v, trans %v", max, texas.BytesToStr(trans))
 }
