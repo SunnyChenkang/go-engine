@@ -134,7 +134,10 @@ func KeyToStr(key int64) string {
 	cs := KeyToPoke(key)
 	for _, cs := range cs {
 		ret += cs.ToString()
+		ret += ","
 	}
+
+	ret = strings.TrimRight(ret, ",")
 
 	return ret
 }
@@ -265,9 +268,9 @@ func ChangeColor(k int64) int64 {
 	return GenCardBind(cs)
 }
 
-func GetMax(str string) (string, []int8) {
+func GetMax(str string) (string, string) {
 	max, trans := GetMaxBytes(StrToBytes(str))
-	return KeyToStr(GenCardBind(max)), trans
+	return KeyToStr(GenCardBind(max)), KeyToStr(GenCardBind(trans))
 }
 
 func GetMaxBytes(bytes []int8) ([]int8, []int8) {
@@ -430,4 +433,12 @@ func GetMaxBytesHandPub(hand []int8, pub []int8) ([]int8, []int8) {
 	sort.Slice(ret, func(i, j int) bool { return ret[i] < ret[j] })
 
 	return ret, guiTrans
+}
+
+func GetWinType(str string) int {
+	keyData := GetKeyDataByKey(GenCardBind(StrToBytes(str)))
+	if keyData == nil {
+		return 0
+	}
+	return keyData.ty
 }
