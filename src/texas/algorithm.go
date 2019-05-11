@@ -442,3 +442,126 @@ func GetWinType(str string) int {
 	}
 	return keyData.ty
 }
+
+func Compare(str1 string, str2 string) int {
+	return CompareByBytes(StrToBytes(str1), StrToBytes(str2))
+}
+
+func CompareByBytes(bytes1 []int8, bytes2 []int8) int {
+	return CompareByKey(GenCardBind(bytes1), GenCardBind(bytes2))
+}
+
+func CompareByKey(k1 int64, k2 int64) int {
+	keyData1 := GetKeyDataByKey(k1)
+	keyData2 := GetKeyDataByKey(k2)
+	if keyData1 == nil && keyData2 == nil {
+		return 0
+	}
+	if keyData1 == nil {
+		return -1
+	}
+	if keyData2 == nil {
+		return 1
+	}
+	return keyData1.postion - keyData2.postion
+}
+
+func GetWinProbability(str string) float32 {
+	return GetWinProbabilityByBytes(StrToBytes(str))
+}
+
+func GetWinProbabilityByBytes(bytes []int8) float32 {
+	keyData := GetKeyData(bytes)
+	if keyData == nil {
+		return 0
+	}
+	total := 1
+	for i := 0; i < len(bytes); i++ {
+		total = total * (GENNUM - i)
+	}
+	for i := len(bytes); i >= 1; i-- {
+		total = total / i
+	}
+	return float32(keyData.index) / float32(total)
+}
+
+func GetWinProbabilityByKey(key int64) float32 {
+	return GetWinProbabilityByBytes(KeyToBytes(key))
+}
+
+func GetHandProbability(hand string, pub string) float32 {
+	return getHandProbabilityByBytes(StrToBytes(hand), StrToBytes(pub))
+}
+
+func GetHandProbabilityData(k int64) *ProbilityData {
+	num := 0
+	if k > 10000000000 {
+		num = 6
+	} else if k > 100000000 {
+		num = 5
+	} else if k > 1000000 {
+		num = 4
+	} else if k > 10000 {
+		num = 3
+	} else if k > 100 {
+		num = 2
+	}
+	if num < 2 || num > 6 {
+		return nil
+	}
+
+	probilityData, ok := probilityMap[num][k]
+	if !ok {
+		k = RemoveColor(k)
+		probilityData, ok = optprobilityMap[num][k]
+		if !ok {
+			return nil
+		}
+	}
+	return &probilityData
+}
+
+func getHandProbabilityByBytes(hand []int8, pub []int8) float32 {
+
+	hand = append(hand, pub...)
+
+	sort.Slice(hand, func(i, j int) bool { return hand[i] < hand[j] })
+	sort.Slice(pub, func(i, j int) bool { return pub[i] < pub[j] })
+
+	pubkey := GenCardBind(pub)
+
+	pubProbilityData := GetHandProbabilityData(pubkey)
+
+	var avg float32
+	if len(hand) == 7 {
+		avg = GetWinProbabilityByBytes(hand)
+	} else {
+		totalkey := GenCardBind(hand)
+		totalProbilityData := GetHandProbabilityData(totalkey)
+		if totalProbilityData == nil {
+			return 0
+		}
+		avg = totalProbilityData.avg
+	}
+
+	if pubProbilityData == nil {
+		return avg
+	}
+
+	var p float32 = 0.5
+
+	if avg > pubProbilityData.avg {
+		p += 0.5 * (avg - pubProbilityData.avg) / (pubProbilityData.max - pubProbilityData.avg)
+	} else {
+		p += 0.5 * (avg - pubProbilityData.avg) / (pubProbilityData.avg - pubProbilityData.min)
+	}
+
+	if p > 1 {
+		p = 1
+	}
+	if p < 0 {
+		p = 0
+	}
+
+	return p
+}

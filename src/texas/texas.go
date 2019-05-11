@@ -41,15 +41,19 @@ type ProbilityData struct {
 	max float32
 }
 
-var probilityMap []map[int64]ProbilityData
-var optprobilityMap []map[int64]ProbilityData
+var probilityMap [7]map[int64]ProbilityData
+var optprobilityMap [7]map[int64]ProbilityData
 
 func loadProbility(i int, file string) {
 
 	loggo.Debug("start loadProbility %v", file)
 
-	probilityMap1 := make(map[int64]ProbilityData)
-	optprobilityMap1 := make(map[int64]ProbilityData)
+	if probilityMap[i] == nil {
+		probilityMap[i] = make(map[int64]ProbilityData)
+	}
+	if optprobilityMap[i] == nil {
+		optprobilityMap[i] = make(map[int64]ProbilityData)
+	}
 
 	f, err := os.Open(file)
 	if err != nil {
@@ -75,14 +79,11 @@ func loadProbility(i int, file string) {
 		max, _ := strconv.ParseFloat(params[4], 32)
 
 		if ty == 0 {
-			probilityMap1[key] = ProbilityData{float32(probility), float32(min), float32(max)}
+			probilityMap[i][key] = ProbilityData{float32(probility), float32(min), float32(max)}
 		} else {
-			optprobilityMap1[key] = ProbilityData{float32(probility), float32(min), float32(max)}
+			optprobilityMap[i][key] = ProbilityData{float32(probility), float32(min), float32(max)}
 		}
 	}
-
-	probilityMap = append(probilityMap, probilityMap1)
-	optprobilityMap = append(optprobilityMap, optprobilityMap1)
 
 	loggo.Debug("end loadProbility %v", file)
 }
@@ -223,3 +224,8 @@ const (
 )
 
 var GUI = Poke{PokeColor_GUI, PokeValue_GUI}
+
+const (
+	GUINUM = 2
+	GENNUM = 52 + GUINUM
+)
