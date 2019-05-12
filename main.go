@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dht"
 	"loggo"
 	"rbuffergo"
 	"socketgo"
@@ -20,6 +21,8 @@ func main() {
 
 	d := texas.StrToBytes("黑3,梅A,方10,鬼")
 	loggo.Info("%v", texas.BytesToStr(d))
+
+	dht.Load()
 
 	texas.Load()
 
@@ -42,5 +45,7 @@ func main() {
 	loggo.Info("%v", texas.GetWinProbability("方J,方Q,梅K,方10,方7,红7,红J"))
 
 	loggo.Info("%v", texas.GetHandProbability("方7,方10", "黑2,黑4,黑5,黑K"))
+
+	loggo.Info("%v", texas.GetHandProbability("黑A,梅4", "红2,方A,黑A,红8,红3"))
 
 }

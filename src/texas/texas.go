@@ -9,20 +9,54 @@ import (
 	"strings"
 )
 
-func Load() {
+func Load() error {
 
 	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "test", 7})
-
-	LoadColor("texas_data_color.txt")
-	LoadNormal("texas_data_normal.txt")
-	LoadColor("texas_data_extra_color_6.txt")
-	LoadNormal("texas_data_extra_normal_6.txt")
-	LoadColor("texas_data_extra_color_5.txt")
-	LoadNormal("texas_data_extra_normal_5.txt")
-
-	for i := 6; i >= 2; i-- {
-		loadProbility(i, "texas_data_opt_"+strconv.Itoa(i)+".txt")
+	err := LoadNormalColor()
+	if err != nil {
+		return err
 	}
+	err = LoadProbility()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func LoadNormalColor() error {
+	err := LoadColor("texas_data_color.txt")
+	if err != nil {
+		return err
+	}
+	err = LoadNormal("texas_data_normal.txt")
+	if err != nil {
+		return err
+	}
+	err = LoadColor("texas_data_extra_color_6.txt")
+	if err != nil {
+		return err
+	}
+	err = LoadNormal("texas_data_extra_normal_6.txt")
+	if err != nil {
+		return err
+	}
+	err = LoadColor("texas_data_extra_color_5.txt")
+	if err != nil {
+		return err
+	}
+	err = LoadNormal("texas_data_extra_normal_5.txt")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func LoadProbility() error {
+	for i := 6; i >= 2; i-- {
+		err := loadProbility(i, "texas_data_opt_"+strconv.Itoa(i)+".txt")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type KeyData struct {
@@ -44,9 +78,9 @@ type ProbilityData struct {
 var probilityMap [7]map[int64]ProbilityData
 var optprobilityMap [7]map[int64]ProbilityData
 
-func loadProbility(i int, file string) {
+func loadProbility(i int, file string) error {
 
-	loggo.Debug("start loadProbility %v", file)
+	loggo.Info("start loadProbility %v", file)
 
 	if probilityMap[i] == nil {
 		probilityMap[i] = make(map[int64]ProbilityData)
@@ -57,7 +91,8 @@ func loadProbility(i int, file string) {
 
 	f, err := os.Open(file)
 	if err != nil {
-		panic(err)
+		loggo.Error("loadProbility %v", file, err)
+		return err
 	}
 	defer f.Close()
 
@@ -85,11 +120,13 @@ func loadProbility(i int, file string) {
 		}
 	}
 
-	loggo.Debug("end loadProbility %v", file)
+	loggo.Info("end loadProbility %v", file)
+
+	return nil
 }
 
-func LoadNormal(file string) {
-	loggo.Debug("start LoadNormal %v", file)
+func LoadNormal(file string) error {
+	loggo.Info("start LoadNormal %v", file)
 
 	if normalMap == nil {
 		normalMap = make(map[int64]KeyData)
@@ -97,7 +134,8 @@ func LoadNormal(file string) {
 
 	f, err := os.Open(file)
 	if err != nil {
-		panic(err)
+		loggo.Error("LoadNormal %v", file, err)
+		return err
 	}
 	defer f.Close()
 
@@ -122,11 +160,13 @@ func LoadNormal(file string) {
 		normalMap[key] = keyData
 	}
 
-	loggo.Debug("end LoadNormal %v", file)
+	loggo.Info("end LoadNormal %v", file)
+
+	return nil
 }
 
-func LoadColor(file string) {
-	loggo.Debug("start LoadColor %v", file)
+func LoadColor(file string) error {
+	loggo.Info("start LoadColor %v", file)
 
 	if colorMap == nil {
 		colorMap = make(map[int64]KeyData)
@@ -134,7 +174,8 @@ func LoadColor(file string) {
 
 	f, err := os.Open(file)
 	if err != nil {
-		panic(err)
+		loggo.Error("LoadColor %v", file, err)
+		return err
 	}
 	defer f.Close()
 
@@ -159,7 +200,9 @@ func LoadColor(file string) {
 		colorMap[key] = keyData
 	}
 
-	loggo.Debug("end LoadColor %v", file)
+	loggo.Info("end LoadColor %v", file)
+
+	return nil
 }
 
 type Poke struct {
