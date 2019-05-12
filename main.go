@@ -2,6 +2,7 @@ package main
 
 import (
 	"dht"
+	"encoding/json"
 	"loggo"
 	"rbuffergo"
 	"socketgo"
@@ -23,6 +24,9 @@ func main() {
 	loggo.Info("%v", texas.BytesToStr(d))
 
 	dht.Load()
+	fd := dht.Find("a")
+	dd, _ := json.Marshal(fd)
+	loggo.Info("%v", string(dd))
 
 	texas.Load()
 
