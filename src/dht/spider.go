@@ -141,8 +141,8 @@ func Crawl() {
 }
 
 type FindData struct {
-	infohash string
-	name     string
+	Infohash string
+	Name     string
 }
 
 func Find(str string) []FindData {
