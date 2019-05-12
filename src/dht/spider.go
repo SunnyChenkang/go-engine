@@ -96,14 +96,14 @@ func OnCrawl(w *dht.Wire) {
 }
 
 func InsertSpider(infohash string, name string) {
-	_, err := gspider.Exec("insert into meta_info(infohash, name, time) values('" + infohash + "', '" + name + "', DATETIME())")
+	_, err := gdb.Exec("insert into meta_info(infohash, name, time) values('" + infohash + "', '" + name + "', DATETIME())")
 	if err != nil {
 		loggo.Error("insert sqlite3 fail %v", err)
 	}
 
-	gspider.Exec("delete from meta_info where date('now', '-30 day') > date(time)")
+	gdb.Exec("delete from meta_info where date('now', '-30 day') > date(time)")
 
-	num := GetSize(gspider)
+	num := GetSize()
 
 	loggo.Info("InsertSpider size %v", num)
 }
