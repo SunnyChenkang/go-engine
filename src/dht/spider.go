@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var gspider *sql.DB
+var gdb *sql.DB
 
 func Load() error {
 
@@ -19,19 +19,20 @@ func Load() error {
 
 	loggo.Info("sqlite3 Load start")
 
-	gspider, err := sql.Open("sqlite3", "./spider.db")
+	db, err := sql.Open("sqlite3", "./spider.db")
 	if err != nil {
 		loggo.Error("open sqlite3 fail %v", err)
 		return err
 	}
+	gdb = db
 
-	gspider.Exec("CREATE TABLE  IF NOT EXISTS [meta_info](" +
+	gdb.Exec("CREATE TABLE  IF NOT EXISTS [meta_info](" +
 		"[infohash] CHAR(40) NOT NULL," +
 		"[name] TEXT NOT NULL," +
 		"[time] DATETIME NOT NULL," +
 		"PRIMARY KEY([name], [infohash]) ON CONFLICT IGNORE);")
 
-	num := GetSize(gspider)
+	num := GetSize()
 	loggo.Info("sqlite3 size %v", num)
 
 	go Crawl()
@@ -53,6 +54,8 @@ type bitTorrent struct {
 
 func OnCrawl(w *dht.Wire) {
 	for resp := range w.Response() {
+		loggo.Info("OnCrawl resp bytes %v", len(resp.MetadataInfo))
+
 		metadata, err := dht.Decode(resp.MetadataInfo)
 		if err != nil {
 			continue
@@ -105,9 +108,9 @@ func InsertSpider(infohash string, name string) {
 	loggo.Info("InsertSpider size %v", num)
 }
 
-func GetSize(db *sql.DB) int {
+func GetSize() int {
 
-	rows, err := db.Query("select count(*) from meta_info")
+	rows, err := gdb.Query("select count(*) from meta_info")
 	if err != nil {
 		loggo.Error("Query sqlite3 fail %v", err)
 		return 0
@@ -153,7 +156,7 @@ func Find(str string) []FindData {
 	strs := strings.Split(str, " ")
 
 	for _, s := range strs {
-		rows, err := gspider.Query("select infohash,name from meta_info where name like '%" + s + "%'")
+		rows, err := gdb.Query("select infohash,name from meta_info where name like '%" + s + "%'")
 		if err != nil {
 			loggo.Error("Query sqlite3 fail %v", err)
 		}
