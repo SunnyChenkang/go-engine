@@ -8,6 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shiyanhui/dht"
 	_ "github.com/shiyanhui/dht"
+	"strings"
 )
 
 var gspider *sql.DB
@@ -36,27 +37,6 @@ func Load() error {
 	go Crawl()
 
 	return nil
-}
-
-func GetSize(db *sql.DB) int {
-
-	rows, err := db.Query("select count(*) from meta_info")
-	if err != nil {
-		loggo.Error("Query sqlite3 fail %v", err)
-		return 0
-	}
-	defer rows.Close()
-
-	rows.Next()
-
-	var num int
-	err = rows.Scan(&num)
-	if err != nil {
-		loggo.Error("Scan sqlite3 fail %v", err)
-		return 0
-	}
-
-	return num
 }
 
 type file struct {
@@ -108,12 +88,6 @@ func OnCrawl(w *dht.Wire) {
 			loggo.Info("Crawl %s", data)
 
 			InsertSpider(bt.InfoHash, bt.Name)
-			for _, f := range bt.Files {
-				for _, fp := range f.Path {
-					fps := fp.(string)
-					InsertSpider(bt.InfoHash, fps)
-				}
-			}
 		}
 	}
 }
@@ -131,6 +105,27 @@ func InsertSpider(infohash string, name string) {
 	loggo.Info("InsertSpider size %v", num)
 }
 
+func GetSize(db *sql.DB) int {
+
+	rows, err := db.Query("select count(*) from meta_info")
+	if err != nil {
+		loggo.Error("Query sqlite3 fail %v", err)
+		return 0
+	}
+	defer rows.Close()
+
+	rows.Next()
+
+	var num int
+	err = rows.Scan(&num)
+	if err != nil {
+		loggo.Error("Scan sqlite3 fail %v", err)
+		return 0
+	}
+
+	return num
+}
+
 func Crawl() {
 	w := dht.NewWire(65536, 1024, 256)
 	go OnCrawl(w)
@@ -143,4 +138,45 @@ func Crawl() {
 	d := dht.New(config)
 
 	go d.Run()
+}
+
+type FindData struct {
+	infohash string
+	name     string
+}
+
+func Find(str string) []FindData {
+	var ret []FindData
+
+	retmap := make(map[string]string)
+
+	strs := strings.Split(str, " ")
+
+	for _, s := range strs {
+		rows, err := gspider.Query("select infohash,name from meta_info where name like '%" + s + "%'")
+		if err != nil {
+			loggo.Error("Query sqlite3 fail %v", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+
+			var infohash string
+			var name string
+			err = rows.Scan(&infohash, &name)
+			if err != nil {
+				loggo.Error("Scan sqlite3 fail %v", err)
+			}
+
+			_, ok := retmap[infohash]
+			if ok {
+				continue
+			}
+			retmap[infohash] = name
+
+			ret = append(ret, FindData{infohash, name})
+		}
+	}
+
+	return ret
 }
