@@ -7,7 +7,6 @@ import (
 	"github.com/esrrhs/go-engine/src/loggo"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shiyanhui/dht"
-	_ "github.com/shiyanhui/dht"
 	"strings"
 )
 
