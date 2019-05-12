@@ -435,7 +435,12 @@ func GetMaxBytesHandPub(hand []int8, pub []int8) ([]int8, []int8) {
 	return ret, guiTrans
 }
 
-func GetWinType(str string) int {
+func GetWinType(str string) string {
+	id := GetWinTypeId(str)
+	return winName[id]
+}
+
+func GetWinTypeId(str string) int {
 	keyData := GetKeyDataByKey(GenCardBind(StrToBytes(str)))
 	if keyData == nil {
 		return 0

@@ -42,4 +42,5 @@ func main() {
 	loggo.Info("%v", texas.GetWinProbability("方J,方Q,梅K,方10,方7,红7,红J"))
 
 	loggo.Info("%v", texas.GetHandProbability("方7,方10", "黑2,黑4,黑5,黑K"))
+
 }

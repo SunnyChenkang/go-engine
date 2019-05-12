@@ -223,6 +223,18 @@ const (
 	TEXAS_CARD_TYPE_KINGTONGHUASHUN = 10 //皇家同花顺
 )
 
+var winName = []string{"无",
+	"高牌",
+	"对子",
+	"两对",
+	"三条",
+	"顺子",
+	"同花",
+	"葫芦",
+	"四条",
+	"同花顺",
+	"皇家同花顺"}
+
 var GUI = Poke{PokeColor_GUI, PokeValue_GUI}
 
 const (
