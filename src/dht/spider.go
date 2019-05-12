@@ -105,7 +105,7 @@ func InsertSpider(infohash string, name string) {
 
 	num := GetSize()
 
-	loggo.Info("InsertSpider size %v", num)
+	loggo.Info("InsertSpider size %v %v %v", infohash, name, num)
 }
 
 func GetSize() int {
