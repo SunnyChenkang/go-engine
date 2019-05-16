@@ -7,6 +7,7 @@ import (
 	"github.com/esrrhs/go-engine/src/loggo"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shiyanhui/dht"
+	"strconv"
 	"strings"
 )
 
@@ -165,7 +166,7 @@ func Last(n int) []FindData {
 
 	retmap := make(map[string]string)
 
-	rows, err := gdb.Query("select infohash,name from meta_info order by time desc limit 0,2")
+	rows, err := gdb.Query("select infohash,name from meta_info order by time desc limit 0," + strconv.Itoa(n))
 	if err != nil {
 		loggo.Error("Query sqlite3 fail %v", err)
 	}
