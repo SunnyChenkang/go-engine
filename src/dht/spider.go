@@ -160,6 +160,38 @@ type FindData struct {
 	Name     string
 }
 
+func Last(n int) []FindData {
+	var ret []FindData
+
+	retmap := make(map[string]string)
+
+	rows, err := gdb.Query("select infohash,name from meta_info order by time desc limit 0,2")
+	if err != nil {
+		loggo.Error("Query sqlite3 fail %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		var infohash string
+		var name string
+		err = rows.Scan(&infohash, &name)
+		if err != nil {
+			loggo.Error("Scan sqlite3 fail %v", err)
+		}
+
+		_, ok := retmap[infohash]
+		if ok {
+			continue
+		}
+		retmap[infohash] = name
+
+		ret = append(ret, FindData{infohash, name})
+	}
+
+	return ret
+}
+
 func Find(str string) []FindData {
 	var ret []FindData
 
