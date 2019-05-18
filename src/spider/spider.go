@@ -75,7 +75,7 @@ func Start(config Config, url []string) {
 		}
 	}
 
-	loggo.Info("Spider jobs done cral %v, failed %v", jobsCrawlerTotal, jobsCrawlerFail)
+	loggo.Info("Spider jobs done crawl %v, failed %v", jobsCrawlerTotal, jobsCrawlerFail)
 
 	close(crawl)
 	close(parse)

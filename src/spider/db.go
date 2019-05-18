@@ -59,7 +59,7 @@ func InsertSpider(title string, name string, url string) {
 
 	num := GetSize()
 
-	loggo.Info("InsertSpider size %v %v %v %v", title, name, url, num)
+	loggo.Info("InsertSpider %v %v %v size %v", title, name, url, num)
 }
 
 func GetSize() int {
