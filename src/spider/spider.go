@@ -136,7 +136,8 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 				ok = true
 			}
 
-			if strings.HasSuffix(ss, ".mp4") || strings.HasSuffix(ss, ".rmvb") || strings.HasSuffix(ss, ".mkv") {
+			if strings.HasSuffix(ss, ".mp4") || strings.HasSuffix(ss, ".rmvb") || strings.HasSuffix(ss, ".mkv") ||
+				strings.HasSuffix(ss, ".torrent") {
 				ok = true
 			}
 
