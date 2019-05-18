@@ -15,11 +15,11 @@ var gdb *sql.DB
 
 func Load() error {
 
-	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "spider", 7})
+	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "dht", 7})
 
 	loggo.Info("sqlite3 Load start")
 
-	db, err := sql.Open("sqlite3", "./spider.db")
+	db, err := sql.Open("sqlite3", "./dht.db")
 	if err != nil {
 		loggo.Error("open sqlite3 fail %v", err)
 		return err

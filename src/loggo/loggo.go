@@ -12,6 +12,7 @@ import (
 const (
 	LEVEL_DEBUG = iota
 	LEVEL_INFO
+	LEVEL_WARN
 	LEVEL_ERROR
 )
 
@@ -61,6 +62,26 @@ func Info(format string, a ...interface{}) {
 	}
 }
 
+func Warn(format string, a ...interface{}) {
+	checkDate()
+	if gConfig.Level <= LEVEL_WARN {
+		str := genLog(LEVEL_WARN, format, a...)
+		file := openLog(LEVEL_WARN)
+		defer file.Close()
+		if gConfig.Level <= LEVEL_INFO {
+			file1 := openLog(LEVEL_INFO)
+			defer file1.Close()
+			file1.WriteString(str)
+		}
+		if gConfig.Level <= LEVEL_DEBUG {
+			file2 := openLog(LEVEL_DEBUG)
+			defer file2.Close()
+			file2.WriteString(str)
+		}
+		fmt.Print(str)
+	}
+}
+
 func Error(format string, a ...interface{}) {
 	checkDate()
 	if gConfig.Level <= LEVEL_ERROR {
@@ -68,6 +89,11 @@ func Error(format string, a ...interface{}) {
 		file := openLog(LEVEL_ERROR)
 		defer file.Close()
 		file.WriteString(str)
+		if gConfig.Level <= LEVEL_WARN {
+			file0 := openLog(LEVEL_WARN)
+			defer file0.Close()
+			file0.WriteString(str)
+		}
 		if gConfig.Level <= LEVEL_INFO {
 			file1 := openLog(LEVEL_INFO)
 			defer file1.Close()
@@ -125,6 +151,8 @@ func levelName(level int) string {
 		return "DEBUG"
 	case LEVEL_INFO:
 		return "INFO"
+	case LEVEL_WARN:
+		return "WARN"
 	case LEVEL_ERROR:
 		return "ERROR"
 	}

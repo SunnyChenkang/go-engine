@@ -1,11 +1,10 @@
 package main
 
 import (
-	"dht"
-	"encoding/json"
 	"loggo"
 	"rbuffergo"
 	"socketgo"
+	"spider"
 	"texas"
 )
 
@@ -23,10 +22,8 @@ func main() {
 	d := texas.StrToBytes("黑3,梅A,方10,鬼")
 	loggo.Info("%v", texas.BytesToStr(d))
 
-	dht.Load()
-	fd := dht.Find("a")
-	dd, _ := json.Marshal(fd)
-	loggo.Info("%v", string(dd))
+	spider.Load(10, 1000)
+	spider.Entry("https://www.baidu.com")
 
 	texas.Load()
 
