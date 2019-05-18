@@ -61,7 +61,7 @@ func Start(config Config, url []string) {
 
 	for i := 0; i < config.Threadnum; i++ {
 		go Crawler(config, find, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
-		go Parser(config, &jobs, crawl, parse, save)
+		go Parser(config, find, &jobs, crawl, parse, save)
 		go Saver(&jobs, save)
 	}
 
@@ -87,7 +87,7 @@ func Start(config Config, url []string) {
 func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo, jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32) {
 	loggo.Info("Crawler start")
 	for job := range crawl {
-		loggo.Info("receive crawl job %v", job)
+		//loggo.Info("receive crawl job %v", job)
 
 		_, ok := find.LoadOrStore(job, job)
 		if !ok {
@@ -111,11 +111,11 @@ func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, p
 	loggo.Info("Crawler end")
 }
 
-func Parser(config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
+func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
 	loggo.Info("Parser start")
 
 	for job := range parse {
-		loggo.Info("receive parse job %v %v", job.Title, job.UI.Url)
+		//loggo.Info("receive parse job %v %v", job.Title, job.UI.Url)
 
 		for _, s := range job.Son {
 
@@ -159,29 +159,31 @@ func Parser(config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *Pag
 				}
 
 				if valid {
+					_, finded := find.Load(sonurl)
+					if !finded {
+						if config.FocusSpider {
+							dstURL, dsterr := url.Parse(sonurl)
+							srcURL, srcerr := url.Parse(job.UI.Url)
 
-					if config.FocusSpider {
-						dstURL, dsterr := url.Parse(sonurl)
-						srcURL, srcerr := url.Parse(job.UI.Url)
+							if dsterr == nil && srcerr == nil {
+								dstParams := strings.Split(dstURL.Host, ".")
+								srcParams := strings.Split(srcURL.Host, ".")
 
-						if dsterr == nil && srcerr == nil {
-							dstParams := strings.Split(dstURL.Host, ".")
-							srcParams := strings.Split(srcURL.Host, ".")
+								if len(dstParams) >= 2 && len(srcParams) >= 2 && dstParams[len(dstParams)-1] == srcParams[len(srcParams)-1] && dstParams[len(dstParams)-2] == srcParams[len(srcParams)-2] {
+									atomic.AddInt32(jobs, 1)
+									tmp := URLInfo{sonurl, s.UI.Deps}
+									crawl <- &tmp
 
-							if len(dstParams) >= 2 && len(srcParams) >= 2 && dstParams[len(dstParams)-1] == srcParams[len(srcParams)-1] && dstParams[len(dstParams)-2] == srcParams[len(srcParams)-2] {
-								atomic.AddInt32(jobs, 1)
-								tmp := URLInfo{sonurl, s.UI.Deps}
-								crawl <- &tmp
-
-								loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
+									loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
+								}
 							}
-						}
-					} else {
-						atomic.AddInt32(jobs, 1)
-						tmp := URLInfo{sonurl, s.UI.Deps}
-						crawl <- &tmp
+						} else {
+							atomic.AddInt32(jobs, 1)
+							tmp := URLInfo{sonurl, s.UI.Deps}
+							crawl <- &tmp
 
-						loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
+							loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
+						}
 					}
 				}
 			}

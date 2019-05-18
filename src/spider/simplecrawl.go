@@ -11,24 +11,24 @@ import (
 func simplecrawl(ui *URLInfo) *PageInfo {
 
 	url := ui.Url
-	loggo.Info("crawl %v", url)
+	//loggo.Info("crawl %v", url)
 
 	res, err := http.Get(url)
 	if err != nil {
-		loggo.Info("crawl http Get fail %v %v", url, err)
+		loggo.Warn("crawl http Get fail %v %v", url, err)
 		return nil
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		loggo.Info("crawl http StatusCode fail %v %v", url, res.StatusCode)
+		loggo.Warn("crawl http StatusCode fail %v %v", url, res.StatusCode)
 		return nil
 	}
 
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		loggo.Info("crawl http NewDocumentFromReader fail %v %v", url, err)
+		loggo.Warn("crawl http NewDocumentFromReader fail %v %v", url, err)
 		return nil
 	}
 
@@ -52,7 +52,7 @@ func simplecrawl(ui *URLInfo) *PageInfo {
 				enc := mahonia.NewDecoder("gbk")
 				pg.Title = enc.ConvertString(pg.Title)
 			}
-			loggo.Info("simple crawl title %v", pg.Title)
+			//loggo.Info("simple crawl title %v", pg.Title)
 		}
 	})
 
@@ -70,15 +70,11 @@ func simplecrawl(ui *URLInfo) *PageInfo {
 				href = enc.ConvertString(href)
 				name = enc.ConvertString(name)
 			}
-			loggo.Info("simple crawl link %v %v %v %v", i, pg.Title, name, href)
+			//loggo.Info("simple crawl link %v %v %v %v", i, pg.Title, name, href)
 
 			if len(href) > 0 {
 				pgl := PageLinkInfo{URLInfo{href, ui.Deps + 1}, name}
 				pg.Son = append(pg.Son, pgl)
-
-				if !strings.HasPrefix(href, "http://") && !strings.HasPrefix(href, "https://") {
-					loggo.Warn("simple crawl link format fail url:%v href:%v", url, href)
-				}
 			}
 		}
 	})
