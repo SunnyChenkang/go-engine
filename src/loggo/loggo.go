@@ -68,6 +68,7 @@ func Warn(format string, a ...interface{}) {
 		str := genLog(LEVEL_WARN, format, a...)
 		file := openLog(LEVEL_WARN)
 		defer file.Close()
+		file.WriteString(str)
 		if gConfig.Level <= LEVEL_INFO {
 			file1 := openLog(LEVEL_INFO)
 			defer file1.Close()
