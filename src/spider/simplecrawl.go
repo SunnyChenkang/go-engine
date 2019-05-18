@@ -62,8 +62,11 @@ func simplecrawl(ui *URLInfo) *PageInfo {
 		name := s.Text()
 		href, ok := s.Attr("href")
 		if ok {
-			if strings.HasPrefix(href, "/") || strings.HasPrefix(href, "#") {
+			if strings.HasPrefix(href, "/") {
 				href = url + href
+			}
+			if strings.HasPrefix(href, "#") {
+				return
 			}
 			href = strings.TrimSpace(href)
 			name = strings.TrimSpace(name)
