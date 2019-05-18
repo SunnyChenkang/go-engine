@@ -89,7 +89,7 @@ func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, p
 	for job := range crawl {
 		//loggo.Info("receive crawl job %v", job)
 
-		_, ok := find.LoadOrStore(job, job)
+		_, ok := find.LoadOrStore(job.Url, nil)
 		if !ok {
 			if job.Deps < config.Deps {
 				atomic.AddInt32(jobsCrawlerTotal, 1)
