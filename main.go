@@ -25,6 +25,7 @@ func main() {
 	spider.Load()
 	config := spider.Config{1, 1000, 100, 3, true}
 	//entry := []string{"https://ygdy8.com/html/gndy/dyzz/20190517/58605.html"}
+	//entry := []string{"http://www.csdn.net"}
 	entry := []string{"http://www.esrrhs.xyz"}
 	spider.Start(config, entry)
 

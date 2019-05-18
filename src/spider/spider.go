@@ -115,31 +115,53 @@ func Parser(config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *Pag
 	loggo.Info("Parser start")
 
 	for job := range parse {
-		loggo.Info("receive parse job %v %v", job.Title, job.Son)
+		loggo.Info("receive parse job %v %v", job.Title, job.UI.Url)
 
 		for _, s := range job.Son {
 
+			sonurl := s.UI.Url
+
+			if strings.HasPrefix(sonurl, "#") {
+				continue
+			}
+
+			if sonurl == "/" {
+				continue
+			}
+
+			ss := strings.ToLower(sonurl)
+
 			ok := false
-			if strings.HasPrefix(s.UI.Url, "thunder://") || strings.HasPrefix(s.UI.Url, "magnet://") {
+			if strings.HasPrefix(ss, "thunder://") || strings.HasPrefix(ss, "magnet://") {
 				ok = true
 			}
 
-			ss := strings.ToLower(s.UI.Url)
 			if strings.HasSuffix(ss, ".mp4") || strings.HasSuffix(ss, ".rmvb") || strings.HasSuffix(ss, ".mkv") {
 				ok = true
 			}
 
 			if ok {
-				di := DBInfo{job.Title, s.Name, s.UI.Url}
+				di := DBInfo{job.Title, s.Name, sonurl}
 				atomic.AddInt32(jobs, 1)
 				save <- &di
 
-				loggo.Info("receive parse ok %v %v %v", job.Title, s.Name, s.UI.Url)
+				loggo.Info("receive parse ok %v %v %v", job.Title, s.Name, sonurl)
 			} else {
+				valid := false
 				if strings.HasPrefix(ss, "http://") || strings.HasPrefix(ss, "https://") {
+					valid = true
+				}
+
+				if strings.HasPrefix(ss, "/") {
+					tmp := strings.TrimRight(job.UI.Url, "/")
+					sonurl = tmp + sonurl
+					valid = true
+				}
+
+				if valid {
 
 					if config.FocusSpider {
-						dstURL, dsterr := url.Parse(s.UI.Url)
+						dstURL, dsterr := url.Parse(sonurl)
 						srcURL, srcerr := url.Parse(job.UI.Url)
 
 						if dsterr == nil && srcerr == nil {
@@ -148,14 +170,18 @@ func Parser(config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *Pag
 
 							if len(dstParams) >= 2 && len(srcParams) >= 2 && dstParams[len(dstParams)-1] == srcParams[len(srcParams)-1] && dstParams[len(dstParams)-2] == srcParams[len(srcParams)-2] {
 								atomic.AddInt32(jobs, 1)
-								tmp := URLInfo{s.UI.Url, s.UI.Deps}
+								tmp := URLInfo{sonurl, s.UI.Deps}
 								crawl <- &tmp
+
+								loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
 							}
 						}
 					} else {
 						atomic.AddInt32(jobs, 1)
-						tmp := URLInfo{s.UI.Url, s.UI.Deps}
+						tmp := URLInfo{sonurl, s.UI.Deps}
 						crawl <- &tmp
+
+						loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
 					}
 				}
 			}
