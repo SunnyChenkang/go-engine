@@ -154,9 +154,12 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 				}
 
 				if strings.HasPrefix(ss, "/") {
-					tmp := strings.TrimRight(job.UI.Url, "/")
-					sonurl = tmp + sonurl
-					valid = true
+					dstURL, dsterr := url.Parse(job.UI.Url)
+					if dsterr == nil {
+						tmp := strings.TrimRight(dstURL.Scheme+"://"+dstURL.Host, "/")
+						sonurl = tmp + sonurl
+						valid = true
+					}
 				}
 
 				if valid {
