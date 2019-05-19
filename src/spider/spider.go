@@ -2,12 +2,12 @@ package spider
 
 import (
 	"github.com/esrrhs/go-engine/src/loggo"
+	"github.com/esrrhs/go-engine/src/synclist"
 	_ "github.com/mattn/go-sqlite3"
 	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
-	"synclist"
 	"time"
 )
 
