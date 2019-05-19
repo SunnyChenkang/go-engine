@@ -138,7 +138,7 @@ func Parser(config Config, find sync.Map, todo synclist.List, jobs *int32, crawl
 			ss := strings.ToLower(sonurl)
 
 			ok := false
-			if strings.HasPrefix(ss, "thunder://") || strings.HasPrefix(ss, "magnet://") ||
+			if strings.HasPrefix(ss, "thunder://") || strings.HasPrefix(ss, "magnet:?") ||
 				strings.HasPrefix(ss, "ed2k://") {
 				ok = true
 			}
