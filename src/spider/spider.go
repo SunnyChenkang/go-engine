@@ -118,7 +118,6 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 		//loggo.Info("receive parse job %v %v", job.Title, job.UI.Url)
 
 		for _, s := range job.Son {
-
 			sonurl := s.UI.Url
 
 			if strings.HasPrefix(sonurl, "#") {
@@ -148,6 +147,11 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 
 				//loggo.Info("receive parse ok %v %v %v", job.Title, s.Name, sonurl)
 			} else {
+
+				if s.UI.Deps >= config.Deps {
+					continue
+				}
+
 				valid := false
 				if strings.HasPrefix(ss, "http://") || strings.HasPrefix(ss, "https://") {
 					valid = true
