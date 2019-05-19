@@ -95,7 +95,7 @@ func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, p
 				atomic.AddInt32(jobsCrawlerTotal, 1)
 				pg := simplecrawl(job)
 				if pg != nil {
-					loggo.Info("crawl job ok %v %v %v", job, pg.Title, len(pg.Son))
+					loggo.Info("crawl job ok %v %v %v", job.Url, pg.Title, len(pg.Son))
 					atomic.AddInt32(jobs, 1)
 					parse <- pg
 				} else {
@@ -175,7 +175,7 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 									tmp := URLInfo{sonurl, s.UI.Deps}
 									crawl <- &tmp
 
-									//loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
+									loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
 								}
 							}
 						} else {
@@ -183,7 +183,7 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 							tmp := URLInfo{sonurl, s.UI.Deps}
 							crawl <- &tmp
 
-							//loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
+							loggo.Info("parse spawn job %v %v", job.UI.Url, sonurl)
 						}
 					}
 				}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"loggo"
+	"math"
 	"rbuffergo"
 	"socketgo"
 	"spider"
@@ -23,10 +24,10 @@ func main() {
 	loggo.Info("%v", texas.BytesToStr(d))
 
 	spider.Load()
-	config := spider.Config{10, 1000, 100, 2000, true}
+	config := spider.Config{1, 100, 1000, math.MaxInt32, true}
 	//entry := []string{"https://ygdy8.com/html/gndy/dyzz/20190517/58605.html"}
 	//entry := []string{"http://www.csdn.net"}
-	entry := []string{"http://www.esrrhs.xyz"}
+	entry := []string{"https://ygdy8.com"}
 	spider.Start(config, entry)
 
 	texas.Load()
