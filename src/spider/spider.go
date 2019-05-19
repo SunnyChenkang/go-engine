@@ -95,7 +95,7 @@ func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, p
 				atomic.AddInt32(jobsCrawlerTotal, 1)
 				pg := simplecrawl(job)
 				if pg != nil {
-					//loggo.Info("crawl job ok %v %v %v", job, pg.Title, len(pg.Son))
+					loggo.Info("crawl job ok %v %v %v", job, pg.Title, len(pg.Son))
 					atomic.AddInt32(jobs, 1)
 					parse <- pg
 				} else {
