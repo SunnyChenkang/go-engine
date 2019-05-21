@@ -6,7 +6,6 @@ import (
 	"math"
 	"net/url"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -49,7 +48,9 @@ func Start(config Config, url string) {
 	old := GetJobSize(url)
 	if old == 0 {
 		InsertSpiderJob(url, url, 0)
+		DeleteSpiderDone(url)
 	}
+
 	old = GetJobSize(url)
 	if old == 0 {
 		loggo.Error("Spider job no jobs %v", url)
@@ -75,14 +76,14 @@ func Start(config Config, url string) {
 	var jobsCrawlerFail int32
 
 	for i := 0; i < config.Threadnum; i++ {
-		go Crawler(config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
-		go Parser(config, &jobs, crawl, parse, save)
+		go Crawler(url, config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
+		go Parser(url, config, &jobs, crawl, parse, save)
 		go Saver(&jobs, save)
 	}
 
 	for {
-		tmp := todo.Pop()
-		if tmp == nil {
+		tmpurls, tmpdeps := PopSpiderJob(url, 1024)
+		if len(tmpurls) == 0 {
 			time.Sleep(time.Second)
 			if jobs <= 0 {
 				time.Sleep(time.Second)
@@ -91,7 +92,9 @@ func Start(config Config, url string) {
 				}
 			}
 		} else {
-			crawl <- tmp.(*URLInfo)
+			for i, url := range tmpurls {
+				crawl <- &URLInfo{url, tmpdeps[i]}
+			}
 		}
 	}
 
@@ -109,8 +112,9 @@ func Crawler(src string, config Config, jobs *int32, crawl <-chan *URLInfo, pars
 	for job := range crawl {
 		//loggo.Info("receive crawl job %v", job)
 
-		ok := HasJob(src, job.Url)
+		ok := HasDone(src, job.Url)
 		if !ok {
+			InsertSpiderDone(src, job.Url)
 			if job.Deps < config.Deps {
 				atomic.AddInt32(jobsCrawlerTotal, 1)
 				pg := simplecrawl(job)
@@ -131,7 +135,7 @@ func Crawler(src string, config Config, jobs *int32, crawl <-chan *URLInfo, pars
 	loggo.Info("Crawler end")
 }
 
-func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
+func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
 	loggo.Info("Parser start")
 
 	for job := range parse {
@@ -190,7 +194,7 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 				var tmp *URLInfo
 
 				if valid {
-					_, finded := find.Load(sonurl)
+					finded := HasDone(src, sonurl)
 					if !finded {
 						if config.FocusSpider {
 							dstURL, dsterr := url.Parse(sonurl)
@@ -214,13 +218,12 @@ func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, pa
 				}
 
 				if tmp != nil {
-					if !todo.ContainBy(tmp, func(left interface{}, right interface{}) bool {
-						return left.(*URLInfo).Url == right.(*URLInfo).Url
-					}) {
+					hasJob := HasJob(src, tmp.Url)
+					if !hasJob {
+						InsertSpiderJob(src, tmp.Url, tmp.Deps)
 						atomic.AddInt32(jobs, 1)
-						todo.Push(tmp)
 
-						loggo.Info("parse spawn job %v %v %v", job.UI.Url, sonurl, todo.Len())
+						//loggo.Info("parse spawn job %v %v %v", job.UI.Url, sonurl, GetJobSize(src))
 					}
 				}
 			}

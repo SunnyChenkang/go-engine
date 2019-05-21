@@ -23,6 +23,8 @@ var gHasJobStmt *sql.Stmt
 
 var gInsertDoneStmt *sql.Stmt
 var gSizeDoneStmt *sql.Stmt
+var gDeleteDoneStmt *sql.Stmt
+var gHasDoneStmt *sql.Stmt
 
 func Load() error {
 
@@ -45,11 +47,11 @@ func Load() error {
 		"PRIMARY KEY([url]) ON CONFLICT IGNORE);")
 
 	gdb.Exec("CREATE TABLE  IF NOT EXISTS [link_job_info](" +
+		"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"[src] TEXT NOT NULL," +
 		"[url] TEXT NOT NULL," +
 		"[deps] INT NOT NULL," +
-		"[time] DATETIME NOT NULL," +
-		"PRIMARY KEY([url]) ON CONFLICT IGNORE);")
+		"[time] DATETIME NOT NULL);")
 
 	gdb.Exec("CREATE TABLE  IF NOT EXISTS [link_done_info](" +
 		"[src] TEXT NOT NULL," +
@@ -96,7 +98,7 @@ func Load() error {
 
 	////
 
-	stmt, err = gdb.Prepare("insert into link_job_info(src, url, deps, time) values(?, ?, ?, DATETIME())")
+	stmt, err = gdb.Prepare("insert into link_job_info(id, src, url, deps, time) values(NULL, ?, ?, ?, DATETIME())")
 	if err != nil {
 		loggo.Error("Prepare sqlite3 fail %v", err)
 		return err
@@ -110,14 +112,14 @@ func Load() error {
 	}
 	gSizeJobStmt = stmt
 
-	stmt, err = gdb.Prepare("delete from link_job_info where src = ? and url = ?")
+	stmt, err = gdb.Prepare("delete from link_job_info where id = ?")
 	if err != nil {
 		loggo.Error("Prepare sqlite3 fail %v", err)
 		return err
 	}
 	gDeleteJobStmt = stmt
 
-	stmt, err = gdb.Prepare("select url, deps from link_job_info where src = ? limit 0, ?")
+	stmt, err = gdb.Prepare("select id, url, deps from link_job_info where src = ? limit 0, ?")
 	if err != nil {
 		loggo.Error("Prepare sqlite3 fail %v", err)
 		return err
@@ -147,6 +149,20 @@ func Load() error {
 	}
 	gSizeDoneStmt = stmt
 
+	stmt, err = gdb.Prepare("delete from link_done_info where src = ?")
+	if err != nil {
+		loggo.Error("Prepare sqlite3 fail %v", err)
+		return err
+	}
+	gDeleteDoneStmt = stmt
+
+	stmt, err = gdb.Prepare("select url from link_done_info where src = ? and url = ?")
+	if err != nil {
+		loggo.Error("Prepare sqlite3 fail %v", err)
+		return err
+	}
+	gHasDoneStmt = stmt
+
 	////
 
 	num := GetSize()
@@ -157,6 +173,7 @@ func Load() error {
 
 func PopSpiderJob(src string, n int) ([]string, []int) {
 
+	var ids []int
 	var ret []string
 	var retdeps []int
 
@@ -169,23 +186,29 @@ func PopSpiderJob(src string, n int) ([]string, []int) {
 
 	for rows.Next() {
 
+		var id int
 		var url string
 		var deps int
-		err = rows.Scan(&url, &deps)
+		err = rows.Scan(&id, &url, &deps)
 		if err != nil {
 			loggo.Error("Scan sqlite3 fail %v", err)
 		}
 
+		ids = append(ids, id)
 		ret = append(ret, url)
 		retdeps = append(retdeps, deps)
 	}
 
 	for i, url := range ret {
-		gDeleteJobStmt.Exec(src, url)
-		loggo.Info("PopSpiderJob %v %v %v", src, url, retdeps[i])
+		gDeleteJobStmt.Exec(ids[i])
+		loggo.Info("PopSpiderJob %v %v %v %v", ids[i], src, url, retdeps[i])
 	}
 
 	return ret, retdeps
+}
+
+func DeleteSpiderDone(src string) {
+	gDeleteDoneStmt.Exec(src)
 }
 
 func InsertSpiderJob(src string, url string, deps int) {
@@ -198,6 +221,18 @@ func InsertSpiderJob(src string, url string, deps int) {
 	num := GetJobSize(src)
 
 	loggo.Info("InsertSpiderJob %v size %v", url, num)
+}
+
+func InsertSpiderDone(src string, url string) {
+
+	_, err := gInsertDoneStmt.Exec(src, url)
+	if err != nil {
+		loggo.Error("InsertSpiderDone insert sqlite3 fail %v", err)
+	}
+
+	num := GetDoneSize(src)
+
+	loggo.Info("InsertSpiderDone %v size %v", url, num)
 }
 
 func InsertSpider(title string, name string, url string) {
@@ -223,6 +258,15 @@ func HasJob(src string, url string) bool {
 	return true
 }
 
+func HasDone(src string, url string) bool {
+	var surl string
+	err := gHasDoneStmt.QueryRow(src, url).Scan(&surl)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func GetSize() int {
 
 	var ret int
@@ -238,6 +282,17 @@ func GetJobSize(src string) int {
 
 	var ret int
 	err := gSizeJobStmt.QueryRow(src).Scan(&ret)
+	if err != nil {
+		loggo.Error("Scan sqlite3 fail %v", err)
+		return 0
+	}
+	return ret
+}
+
+func GetDoneSize(src string) int {
+
+	var ret int
+	err := gSizeDoneStmt.QueryRow(src).Scan(&ret)
 	if err != nil {
 		loggo.Error("Scan sqlite3 fail %v", err)
 		return 0
