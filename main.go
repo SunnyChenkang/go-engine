@@ -23,11 +23,11 @@ func main() {
 	loggo.Info("%v", texas.BytesToStr(d))
 
 	spider.Load()
-	config := spider.Config{1, 100, 1000, 4, true}
-	//entry := "https://ygdy8.com"
+	config := spider.Config{1, 100, 100, 2, true}
+	entry := "https://ygdy8.com/html/gndy/dyzz/20190520/58618.html"
 	//entry := "http://www.csdn.net"
 	//entry := "https://www.80ying.com"
-	entry := "http://www.esrrhs.xyz"
+	//entry := "http://www.esrrhs.xyz"
 	spider.Start(config, entry)
 
 	texas.Load()

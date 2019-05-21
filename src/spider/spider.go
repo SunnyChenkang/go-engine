@@ -57,17 +57,18 @@ func Start(config Config, url string) {
 		return
 	}
 
+	crawl := make(chan *URLInfo, config.Buffersize)
+	parse := make(chan *PageInfo, config.Buffersize)
+	save := make(chan *DBInfo, config.Buffersize)
+
+	atomic.AddInt32(&jobs, int32(GetJobSize(url)))
+
 	entry, deps := PopSpiderJob(url, int(math.Min(float64(old), float64(config.Buffersize))))
 	if len(entry) == 0 {
 		loggo.Error("Spider job no jobs %v", url)
 		return
 	}
 
-	crawl := make(chan *URLInfo, config.Buffersize)
-	parse := make(chan *PageInfo, config.Buffersize)
-	save := make(chan *DBInfo, config.Buffersize)
-
-	atomic.AddInt32(&jobs, int32(len(entry)))
 	for i, u := range entry {
 		crawl <- &URLInfo{u, deps[i]}
 	}
@@ -211,7 +212,6 @@ func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse
 								}
 							}
 						} else {
-							atomic.AddInt32(jobs, 1)
 							tmp = &URLInfo{sonurl, s.UI.Deps}
 						}
 					}
@@ -220,8 +220,8 @@ func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse
 				if tmp != nil {
 					hasJob := HasJob(src, tmp.Url)
 					if !hasJob {
-						InsertSpiderJob(src, tmp.Url, tmp.Deps)
 						atomic.AddInt32(jobs, 1)
+						InsertSpiderJob(src, tmp.Url, tmp.Deps)
 
 						//loggo.Info("parse spawn job %v %v %v", job.UI.Url, sonurl, GetJobSize(src))
 					}
@@ -238,7 +238,7 @@ func Saver(jobs *int32, save <-chan *DBInfo) {
 	loggo.Info("Saver start")
 
 	for job := range save {
-		loggo.Info("receive save job %v %v %v", job.Title, job.Name, job.Url)
+		//loggo.Info("receive save job %v %v %v", job.Title, job.Name, job.Url)
 
 		InsertSpider(job.Title, job.Name, job.Url)
 

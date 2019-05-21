@@ -142,7 +142,7 @@ func Load() error {
 	}
 	gInsertDoneStmt = stmt
 
-	stmt, err = gdb.Prepare("select count(*) from link_done_info")
+	stmt, err = gdb.Prepare("select count(*) from link_done_info where src = ?")
 	if err != nil {
 		loggo.Error("HasDone Prepare sqlite3 fail %v", err)
 		return err
