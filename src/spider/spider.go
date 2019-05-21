@@ -2,8 +2,8 @@ package spider
 
 import (
 	"github.com/esrrhs/go-engine/src/loggo"
-	"github.com/esrrhs/go-engine/src/synclist"
 	_ "github.com/mattn/go-sqlite3"
+	"math"
 	"net/url"
 	"strings"
 	"sync"
@@ -41,29 +41,42 @@ type URLInfo struct {
 	Deps int
 }
 
-func Start(config Config, url []string) {
+func Start(config Config, url string) {
 	loggo.Info("Spider Start  %v", url)
+
+	var jobs int32
+
+	old := GetJobSize(url)
+	if old == 0 {
+		InsertSpiderJob(url, url, 0)
+	}
+	old = GetJobSize(url)
+	if old == 0 {
+		loggo.Error("Spider job no jobs %v", url)
+		return
+	}
+
+	entry, deps := PopSpiderJob(url, int(math.Min(float64(old), float64(config.Buffersize))))
+	if len(entry) == 0 {
+		loggo.Error("Spider job no jobs %v", url)
+		return
+	}
 
 	crawl := make(chan *URLInfo, config.Buffersize)
 	parse := make(chan *PageInfo, config.Buffersize)
 	save := make(chan *DBInfo, config.Buffersize)
 
-	var jobs int32
-
-	var find sync.Map
-	todo := synclist.NewList()
-
-	for _, u := range url {
-		atomic.AddInt32(&jobs, 1)
-		crawl <- &URLInfo{u, 0}
+	atomic.AddInt32(&jobs, int32(len(entry)))
+	for i, u := range entry {
+		crawl <- &URLInfo{u, deps[i]}
 	}
 
 	var jobsCrawlerTotal int32
 	var jobsCrawlerFail int32
 
 	for i := 0; i < config.Threadnum; i++ {
-		go Crawler(config, find, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
-		go Parser(config, find, *todo, &jobs, crawl, parse, save)
+		go Crawler(config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
+		go Parser(config, &jobs, crawl, parse, save)
 		go Saver(&jobs, save)
 	}
 
@@ -71,9 +84,9 @@ func Start(config Config, url []string) {
 		tmp := todo.Pop()
 		if tmp == nil {
 			time.Sleep(time.Second)
-			if jobs == 0 {
+			if jobs <= 0 {
 				time.Sleep(time.Second)
-				if jobs == 0 {
+				if jobs <= 0 {
 					break
 				}
 			}
@@ -91,12 +104,12 @@ func Start(config Config, url []string) {
 	loggo.Info("Spider end %v", GetSize())
 }
 
-func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo, jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32) {
+func Crawler(src string, config Config, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo, jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32) {
 	loggo.Info("Crawler start")
 	for job := range crawl {
 		//loggo.Info("receive crawl job %v", job)
 
-		_, ok := find.LoadOrStore(job.Url, nil)
+		ok := HasJob(src, job.Url)
 		if !ok {
 			if job.Deps < config.Deps {
 				atomic.AddInt32(jobsCrawlerTotal, 1)
@@ -118,7 +131,7 @@ func Crawler(config Config, find sync.Map, jobs *int32, crawl <-chan *URLInfo, p
 	loggo.Info("Crawler end")
 }
 
-func Parser(config Config, find sync.Map, todo synclist.List, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
+func Parser(config Config, find sync.Map, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
 	loggo.Info("Parser start")
 
 	for job := range parse {

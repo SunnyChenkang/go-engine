@@ -11,7 +11,7 @@ import (
 func simplecrawl(ui *URLInfo) *PageInfo {
 
 	url := ui.Url
-	//loggo.Info("crawl %v", url)
+	loggo.Info("start crawl %v", url)
 
 	res, err := http.Get(url)
 	if err != nil {
