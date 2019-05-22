@@ -134,13 +134,13 @@ func LoadJob(src string) *JobDB {
 	ret.src = src
 
 	gdb.Exec("CREATE TABLE  IF NOT EXISTS [link_job_info](" +
-		"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"[src] TEXT NOT NULL," +
 		"[url] TEXT NOT NULL," +
 		"[deps] INT NOT NULL," +
-		"[time] DATETIME NOT NULL);")
+		"[time] DATETIME NOT NULL," +
+		"PRIMARY KEY([url]) ON CONFLICT IGNORE);")
 
-	stmt, err := gdb.Prepare("insert into link_job_info(id, src, url, deps, time) values(NULL, ?, ?, ?, DATETIME())")
+	stmt, err := gdb.Prepare("insert into link_job_info(src, url, deps, time) values(?, ?, ?, DATETIME())")
 	if err != nil {
 		loggo.Error("Prepare Job sqlite3 fail %v", err)
 		return nil
@@ -154,14 +154,14 @@ func LoadJob(src string) *JobDB {
 	}
 	ret.gSizeJobStmt = stmt
 
-	stmt, err = gdb.Prepare("delete from link_job_info where id = ?")
+	stmt, err = gdb.Prepare("delete from link_job_info where src = ? and url = ?")
 	if err != nil {
 		loggo.Error("Prepare Job sqlite3 fail %v", err)
 		return nil
 	}
 	ret.gDeleteJobStmt = stmt
 
-	stmt, err = gdb.Prepare("select id, url, deps from link_job_info where src = ? limit 0, ?")
+	stmt, err = gdb.Prepare("select url, deps from link_job_info where src = ? limit 0, ?")
 	if err != nil {
 		loggo.Error("Prepare Job sqlite3 fail %v", err)
 		return nil
@@ -244,7 +244,6 @@ func LoadDone(src string) *DoneDB {
 
 func PopSpiderJob(db *JobDB, n int) ([]string, []int) {
 
-	var ids []int
 	var ret []string
 	var retdeps []int
 
@@ -260,24 +259,22 @@ func PopSpiderJob(db *JobDB, n int) ([]string, []int) {
 
 	for rows.Next() {
 
-		var id int
 		var url string
 		var deps int
-		err = rows.Scan(&id, &url, &deps)
+		err = rows.Scan(&url, &deps)
 		if err != nil {
 			loggo.Error("PopSpiderJob Scan sqlite3 fail %v %v", db.src, err)
 		}
 
-		ids = append(ids, id)
 		ret = append(ret, url)
 		retdeps = append(retdeps, deps)
 	}
 
 	for i, url := range ret {
 		db.lock.Lock()
-		db.gDeleteJobStmt.Exec(ids[i])
+		db.gDeleteJobStmt.Exec(db.src, url)
 		db.lock.Unlock()
-		loggo.Info("PopSpiderJob %v %v %v %v", ids[i], db.src, url, retdeps[i])
+		loggo.Info("PopSpiderJob %v %v %v", db.src, url, retdeps[i])
 	}
 
 	return ret, retdeps
