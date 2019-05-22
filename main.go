@@ -22,7 +22,7 @@ func main() {
 	d := texas.StrToBytes("黑3,梅A,方10,鬼")
 	loggo.Info("%v", texas.BytesToStr(d))
 
-	config := spider.Config{1, 100, 100, 2, true}
+	config := spider.Config{1, 100, 100, 1, true}
 	//entry := "https://ygdy8.com/html/gndy/dyzz/20190520/58618.html"
 	//entry := "http://www.csdn.net"
 	//entry := "https://www.80ying.com"
@@ -32,7 +32,7 @@ func main() {
 
 	texas.Load()
 
-	max, trans := texas.GetMax("黑3,梅A,梅K,方10,方9,鬼,红2")
+	max, trans := texas.GetMax("方8,红J,方6,红3,方5,红A,方4")
 	loggo.Info("max %v, trans %v", max, trans)
 
 	max, trans = texas.GetMax("黑3,梅Q,梅K,方10,方9,方8,红J")
