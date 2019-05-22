@@ -29,11 +29,19 @@ func Ini(config Config) {
 		fmt.Println("loggo had ini before " + gConfig.Prefix)
 		return
 	}
+
 	gConfig = config
-	if strings.Contains(gConfig.Prefix, "_") {
-		panic("log prefix shout not contain _")
+	if gConfig.Prefix == "" {
+		panic("log prefix is empty")
 	}
-	go loopCheck()
+
+	if strings.Contains(gConfig.Prefix, "_") {
+		panic("log prefix contain _")
+	}
+
+	Warn("loggo Ini")
+
+	go loopCheck(gConfig)
 }
 
 func Debug(format string, a ...interface{}) {
@@ -167,7 +175,7 @@ func openLog(level int) os.File {
 	return *f
 }
 
-func checkDate() {
+func checkDate(config Config) {
 	now := time.Now().Format("2006-01-02")
 	nowt, _ := time.Parse("2006-01-02", now)
 	nowunix := nowt.Unix()
@@ -186,7 +194,7 @@ func checkDate() {
 			return nil
 		}
 
-		if strs[0] != gConfig.Prefix {
+		if strs[0] != config.Prefix {
 			return nil
 		}
 
@@ -198,7 +206,7 @@ func checkDate() {
 			return nil
 		}
 		tunix := t.Unix()
-		if nowunix-tunix > 7*24*3600 {
+		if nowunix-tunix > int64(config.MaxDay)*24*3600 {
 			os.Remove(f.Name())
 		}
 
@@ -206,9 +214,9 @@ func checkDate() {
 	})
 }
 
-func loopCheck() {
+func loopCheck(config Config) {
 	for {
-		checkDate()
+		checkDate(config)
 		time.Sleep(time.Minute)
 	}
 }
