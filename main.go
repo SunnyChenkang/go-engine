@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "test", 7})
+	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "test", 2})
 
 	loggo.Info("start")
 
