@@ -10,6 +10,8 @@ import (
 )
 
 type DB struct {
+	counter     int
+	size        int
 	gdb         *sql.DB
 	lock        sync.Mutex
 	gInsertStmt *sql.Stmt
@@ -20,6 +22,8 @@ type DB struct {
 }
 
 type JobDB struct {
+	counter        int
+	size           int
 	gdb            *sql.DB
 	src            string
 	lock           sync.Mutex
@@ -31,6 +35,8 @@ type JobDB struct {
 }
 
 type DoneDB struct {
+	counter         int
+	size            int
 	gdb             *sql.DB
 	src             string
 	lock            sync.Mutex
@@ -355,6 +361,11 @@ func HasDone(db *DoneDB, url string) bool {
 }
 
 func GetSize(db *DB) int {
+	if db.counter%100 != 0 {
+		return db.counter
+	}
+	db.counter++
+
 	db.lock.Lock()
 	var ret int
 	err := db.gSizeStmt.QueryRow().Scan(&ret)
@@ -363,10 +374,16 @@ func GetSize(db *DB) int {
 		return 0
 	}
 	db.lock.Unlock()
+	db.size = ret
 	return ret
 }
 
 func GetJobSize(db *JobDB) int {
+	if db.counter%100 != 0 {
+		return db.counter
+	}
+	db.counter++
+
 	db.lock.Lock()
 	var ret int
 	err := db.gSizeJobStmt.QueryRow(db.src).Scan(&ret)
@@ -374,10 +391,16 @@ func GetJobSize(db *JobDB) int {
 		loggo.Error("GetJobSize fail %v %v", db.src, err)
 	}
 	db.lock.Unlock()
+	db.size = ret
 	return ret
 }
 
 func GetDoneSize(db *DoneDB) int {
+	if db.counter%100 != 0 {
+		return db.counter
+	}
+	db.counter++
+
 	db.lock.Lock()
 	var ret int
 	err := db.gSizeDoneStmt.QueryRow(db.src).Scan(&ret)
@@ -386,6 +409,7 @@ func GetDoneSize(db *DoneDB) int {
 		return 0
 	}
 	db.lock.Unlock()
+	db.size = ret
 	return ret
 }
 
