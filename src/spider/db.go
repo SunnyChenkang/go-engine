@@ -64,9 +64,9 @@ func Load() *DB {
 		"[time] DATETIME NOT NULL," +
 		"PRIMARY KEY([url]) ON CONFLICT IGNORE);")
 
-	gdb.Exec("DROP TABLE IF EXISTS link_job_info;")
+	//gdb.Exec("DROP TABLE IF EXISTS link_job_info;")
 
-	gdb.Exec("DROP TABLE IF EXISTS link_done_info;")
+	//gdb.Exec("DROP TABLE IF EXISTS link_done_info;")
 
 	////
 
@@ -359,7 +359,7 @@ func HasDone(db *DoneDB, url string) bool {
 }
 
 func GetSize(db *DB) int {
-	if db.counter%100 != 0 {
+	if db.counter%10000 != 0 {
 		return int(db.size)
 	}
 	db.counter++

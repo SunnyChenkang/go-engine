@@ -33,10 +33,10 @@ func Ini(config Config) {
 	if strings.Contains(gConfig.Prefix, "_") {
 		panic("log prefix shout not contain _")
 	}
+	go loopCheck()
 }
 
 func Debug(format string, a ...interface{}) {
-	checkDate()
 	if gConfig.Level <= LEVEL_DEBUG {
 		str := genLog(LEVEL_DEBUG, format, a...)
 		file := openLog(LEVEL_DEBUG)
@@ -47,7 +47,6 @@ func Debug(format string, a ...interface{}) {
 }
 
 func Info(format string, a ...interface{}) {
-	checkDate()
 	if gConfig.Level <= LEVEL_INFO {
 		str := genLog(LEVEL_INFO, format, a...)
 		file := openLog(LEVEL_INFO)
@@ -63,7 +62,6 @@ func Info(format string, a ...interface{}) {
 }
 
 func Warn(format string, a ...interface{}) {
-	checkDate()
 	if gConfig.Level <= LEVEL_WARN {
 		str := genLog(LEVEL_WARN, format, a...)
 		file := openLog(LEVEL_WARN)
@@ -84,7 +82,6 @@ func Warn(format string, a ...interface{}) {
 }
 
 func Error(format string, a ...interface{}) {
-	checkDate()
 	if gConfig.Level <= LEVEL_ERROR {
 		str := genLog(LEVEL_ERROR, format, a...)
 		file := openLog(LEVEL_ERROR)
@@ -207,4 +204,11 @@ func checkDate() {
 
 		return nil
 	})
+}
+
+func loopCheck() {
+	for {
+		checkDate()
+		time.Sleep(time.Minute)
+	}
 }
