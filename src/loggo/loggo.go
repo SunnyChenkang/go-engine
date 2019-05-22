@@ -2,6 +2,7 @@ package loggo
 
 import (
 	"fmt"
+	"github.com/esrrhs/go-engine/src/loggo"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -203,11 +204,16 @@ func checkDate(config Config) {
 
 		t, e := time.Parse("2006-01-02", date)
 		if e != nil {
+			loggo.Error("loggo delete Parse file fail %v %v %v", f.Name(), date, err)
 			return nil
 		}
 		tunix := t.Unix()
 		if nowunix-tunix > int64(config.MaxDay)*24*3600 {
-			os.Remove(f.Name())
+			err := os.Remove(f.Name())
+			if e != nil {
+				loggo.Error("loggo delete log file fail %v %v", f.Name(), err)
+				return nil
+			}
 		}
 
 		return nil
