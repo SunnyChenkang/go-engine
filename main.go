@@ -22,13 +22,13 @@ func main() {
 	d := texas.StrToBytes("黑3,梅A,方10,鬼")
 	loggo.Info("%v", texas.BytesToStr(d))
 
-	spider.Load()
 	config := spider.Config{1, 100, 100, 2, true}
-	entry := "https://ygdy8.com/html/gndy/dyzz/20190520/58618.html"
+	//entry := "https://ygdy8.com/html/gndy/dyzz/20190520/58618.html"
 	//entry := "http://www.csdn.net"
 	//entry := "https://www.80ying.com"
-	//entry := "http://www.esrrhs.xyz"
-	spider.Start(config, entry)
+	entry := "http://www.esrrhs.xyz"
+	db := spider.Load()
+	spider.Start(db, config, entry)
 
 	texas.Load()
 

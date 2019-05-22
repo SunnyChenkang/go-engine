@@ -40,18 +40,29 @@ type URLInfo struct {
 	Deps int
 }
 
-func Start(config Config, url string) {
+func Start(db *DB, config Config, url string) {
 	loggo.Info("Spider Start  %v", url)
 
 	var jobs int32
 
-	old := GetJobSize(url)
-	if old == 0 {
-		InsertSpiderJob(url, url, 0)
-		DeleteSpiderDone(url)
+	jbd := LoadJob(url)
+	if jbd == nil {
+		loggo.Error("Spider job LoadJob fail %v", url)
+		return
+	}
+	dbd := LoadDone(url)
+	if dbd == nil {
+		loggo.Error("Spider job LoadDone fail %v", url)
+		return
 	}
 
-	old = GetJobSize(url)
+	old := GetJobSize(jbd)
+	if old == 0 {
+		InsertSpiderJob(jbd, url, 0)
+		DeleteSpiderDone(dbd)
+	}
+
+	old = GetJobSize(jbd)
 	if old == 0 {
 		loggo.Error("Spider job no jobs %v", url)
 		return
@@ -61,9 +72,9 @@ func Start(config Config, url string) {
 	parse := make(chan *PageInfo, config.Buffersize)
 	save := make(chan *DBInfo, config.Buffersize)
 
-	atomic.AddInt32(&jobs, int32(GetJobSize(url)))
+	atomic.AddInt32(&jobs, int32(GetJobSize(jbd)))
 
-	entry, deps := PopSpiderJob(url, int(math.Min(float64(old), float64(config.Buffersize))))
+	entry, deps := PopSpiderJob(jbd, int(math.Min(float64(old), float64(config.Buffersize))))
 	if len(entry) == 0 {
 		loggo.Error("Spider job no jobs %v", url)
 		return
@@ -77,13 +88,13 @@ func Start(config Config, url string) {
 	var jobsCrawlerFail int32
 
 	for i := 0; i < config.Threadnum; i++ {
-		go Crawler(url, config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
-		go Parser(url, config, &jobs, crawl, parse, save)
-		go Saver(&jobs, save)
+		go Crawler(jbd, dbd, config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
+		go Parser(jbd, dbd, config, &jobs, crawl, parse, save)
+		go Saver(db, &jobs, save)
 	}
 
 	for {
-		tmpurls, tmpdeps := PopSpiderJob(url, 1024)
+		tmpurls, tmpdeps := PopSpiderJob(jbd, 1024)
 		if len(tmpurls) == 0 {
 			time.Sleep(time.Second)
 			if jobs <= 0 {
@@ -105,17 +116,17 @@ func Start(config Config, url string) {
 	close(parse)
 	close(save)
 
-	loggo.Info("Spider end %v", GetSize())
+	loggo.Info("Spider end %v %v", GetSize(db), GetDoneSize(dbd))
 }
 
-func Crawler(src string, config Config, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo, jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32) {
+func Crawler(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo, jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32) {
 	loggo.Info("Crawler start")
 	for job := range crawl {
 		//loggo.Info("receive crawl job %v", job)
 
-		ok := HasDone(src, job.Url)
+		ok := HasDone(dbd, job.Url)
 		if !ok {
-			InsertSpiderDone(src, job.Url)
+			InsertSpiderDone(dbd, job.Url)
 			if job.Deps < config.Deps {
 				atomic.AddInt32(jobsCrawlerTotal, 1)
 				pg := simplecrawl(job)
@@ -136,7 +147,7 @@ func Crawler(src string, config Config, jobs *int32, crawl <-chan *URLInfo, pars
 	loggo.Info("Crawler end")
 }
 
-func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
+func Parser(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl chan<- *URLInfo, parse <-chan *PageInfo, save chan<- *DBInfo) {
 	loggo.Info("Parser start")
 
 	for job := range parse {
@@ -195,7 +206,7 @@ func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse
 				var tmp *URLInfo
 
 				if valid {
-					finded := HasDone(src, sonurl)
+					finded := HasDone(dbd, sonurl)
 					if !finded {
 						if config.FocusSpider {
 							dstURL, dsterr := url.Parse(sonurl)
@@ -218,10 +229,10 @@ func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse
 				}
 
 				if tmp != nil {
-					hasJob := HasJob(src, tmp.Url)
+					hasJob := HasJob(jbd, tmp.Url)
 					if !hasJob {
 						atomic.AddInt32(jobs, 1)
-						InsertSpiderJob(src, tmp.Url, tmp.Deps)
+						InsertSpiderJob(jbd, tmp.Url, tmp.Deps)
 
 						//loggo.Info("parse spawn job %v %v %v", job.UI.Url, sonurl, GetJobSize(src))
 					}
@@ -234,13 +245,13 @@ func Parser(src string, config Config, jobs *int32, crawl chan<- *URLInfo, parse
 	loggo.Info("Parser end")
 }
 
-func Saver(jobs *int32, save <-chan *DBInfo) {
+func Saver(db *DB, jobs *int32, save <-chan *DBInfo) {
 	loggo.Info("Saver start")
 
 	for job := range save {
 		//loggo.Info("receive save job %v %v %v", job.Title, job.Name, job.Url)
 
-		InsertSpider(job.Title, job.Name, job.Url)
+		InsertSpider(db, job.Title, job.Name, job.Url)
 
 		atomic.AddInt32(jobs, -1)
 	}
