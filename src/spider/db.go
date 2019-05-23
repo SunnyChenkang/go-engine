@@ -7,12 +7,9 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"sync/atomic"
 )
 
 type DB struct {
-	counter     int
-	size        int32
 	gdb         *sql.DB
 	lock        sync.Mutex
 	gInsertStmt *sql.Stmt
@@ -109,8 +106,6 @@ func Load() *DB {
 
 	num := GetSize(ret)
 	loggo.Info("sqlite3 size %v", num)
-
-	ret.size = int32(num)
 
 	return ret
 }
@@ -320,8 +315,6 @@ func InsertSpider(db *DB, title string, name string, url string) {
 	_, err := db.gInsertStmt.Exec(title, name, url)
 	if err != nil {
 		loggo.Error("InsertSpider insert sqlite3 fail %v %v", url, err)
-	} else {
-		atomic.AddInt32(&db.size, 1)
 	}
 	db.lock.Unlock()
 
@@ -329,9 +322,7 @@ func InsertSpider(db *DB, title string, name string, url string) {
 	db.gDeleteStmt.Exec("delete from link_info where date('now', '-30 day') > date(time)")
 	db.lock.Unlock()
 
-	num := GetSize(db)
-
-	loggo.Info("InsertSpider %v %v %v size %v", title, name, url, num)
+	loggo.Info("InsertSpider %v %v %v", title, name, url)
 }
 
 func HasJob(db *JobDB, url string) bool {
@@ -359,11 +350,6 @@ func HasDone(db *DoneDB, url string) bool {
 }
 
 func GetSize(db *DB) int {
-	if db.counter%10000 != 0 {
-		return int(db.size)
-	}
-	db.counter++
-
 	db.lock.Lock()
 	var ret int
 	err := db.gSizeStmt.QueryRow().Scan(&ret)
@@ -371,7 +357,6 @@ func GetSize(db *DB) int {
 		loggo.Error("GetSize fail %v", err)
 	}
 	db.lock.Unlock()
-	db.size = int32(ret)
 	return ret
 }
 
