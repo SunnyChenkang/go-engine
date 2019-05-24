@@ -74,7 +74,7 @@ func Load() *DB {
 	}
 	ret.gInsertStmt = stmt
 
-	stmt, err = gdb.Prepare("select count(*) from link_info")
+	stmt, err = gdb.Prepare("select max(rowid) as ret from link_info")
 	if err != nil {
 		loggo.Error("HasDone Prepare sqlite3 fail %v", err)
 		return nil
@@ -395,6 +395,7 @@ func Last(db *DB, n int) []FindData {
 	retmap := make(map[string]string)
 
 	db.lock.Lock()
+
 	rows, err := db.gLastStmt.Query(n)
 	if err != nil {
 		loggo.Error("Last Query sqlite3 fail %v", err)
@@ -402,7 +403,6 @@ func Last(db *DB, n int) []FindData {
 		return ret
 	}
 	defer rows.Close()
-	db.lock.Unlock()
 
 	for rows.Next() {
 
@@ -423,6 +423,8 @@ func Last(db *DB, n int) []FindData {
 		ret = append(ret, FindData{title, name, url})
 	}
 
+	db.lock.Unlock()
+
 	return ret
 }
 
@@ -436,6 +438,7 @@ func Find(db *DB, str string) []FindData {
 
 	for _, s := range strs {
 		db.lock.Lock()
+
 		rows, err := db.gFindStmt.Query("%"+s+"%", "%"+s+"%")
 		if err != nil {
 			loggo.Error("Find Query sqlite3 fail %v", err)
@@ -443,7 +446,6 @@ func Find(db *DB, str string) []FindData {
 			return ret
 		}
 		defer rows.Close()
-		db.lock.Unlock()
 
 		for rows.Next() {
 
@@ -463,6 +465,8 @@ func Find(db *DB, str string) []FindData {
 
 			ret = append(ret, FindData{title, name, url})
 		}
+
+		db.lock.Unlock()
 	}
 
 	return ret
