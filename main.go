@@ -24,8 +24,8 @@ func main() {
 
 	node.Ini()
 	config := spider.Config{1, 100, 100, 1, true,
-		"puppeteer", 60}
-	entry := "http://bt.hliang.com/show-5629a46fbbc48454e04cb41cb5b25b7a4d7824d7.html"
+		"simple", 60}
+	entry := "http://bt.hliang.com/show-4a1fa9b7bb73346774d2603b63f3c12b2e6581d4.html"
 	//entry := "http://www.csdn.net"
 	//entry := "https://www.80ying.com"
 	//entry := "http://www.esrrhs.xyz"

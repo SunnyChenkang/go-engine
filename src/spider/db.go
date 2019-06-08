@@ -130,7 +130,7 @@ func Load(dsn string, conn int) *DB {
 
 func LoadJob(src string) *JobDB {
 
-	loggo.Info("sqlite3 Load Job start")
+	loggo.Info("sqlite3 Load Job start %v", src)
 
 	dstURL, _ := url.Parse(src)
 	host := dstURL.Host
@@ -189,14 +189,14 @@ func LoadJob(src string) *JobDB {
 	ret.gHasJobStmt = stmt
 
 	num := GetJobSize(ret)
-	loggo.Info("sqlite3 Job size %v", num)
+	loggo.Info("sqlite3 Job size %v %v", src, num)
 
 	return ret
 }
 
 func LoadDone(src string) *DoneDB {
 
-	loggo.Info("sqlite3 Load Done start")
+	loggo.Info("sqlite3 Load Done start %v", src)
 
 	dstURL, _ := url.Parse(src)
 	host := dstURL.Host
@@ -250,7 +250,7 @@ func LoadDone(src string) *DoneDB {
 	////
 
 	num := GetDoneSize(ret)
-	loggo.Info("sqlite3 size %v", num)
+	loggo.Info("sqlite3 size %v %v", src, num)
 
 	return ret
 }
