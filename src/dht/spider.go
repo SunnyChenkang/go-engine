@@ -201,7 +201,7 @@ func Find(str string) []FindData {
 	strs := strings.Split(str, " ")
 
 	for _, s := range strs {
-		rows, err := gdb.Query("select infohash,name from meta_info where name like '%" + s + "%'")
+		rows, err := gdb.Query("select infohash,name from meta_info where name like '%" + s + "%' limit 0,10000")
 		if err != nil {
 			loggo.Error("Query sqlite3 fail %v", err)
 		}
