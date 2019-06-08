@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -15,6 +16,9 @@ var gNodeDir string
 
 func Ini() {
 
+	sysType := runtime.GOOS
+	loggo.Info("sysType %v", sysType)
+
 	GOPATH := os.Getenv("GOPATH")
 	loggo.Info("GOPATH %v", GOPATH)
 
@@ -22,7 +26,7 @@ func Ini() {
 
 	dir := ""
 	for _, p := range gpaths {
-		tmp := p + "/node/"
+		tmp := p + "/node/" + sysType + "/"
 		tmp = filepath.Clean(tmp)
 		tmp = filepath.ToSlash(tmp)
 		if _, err := os.Stat(tmp); !os.IsNotExist(err) {
