@@ -4,33 +4,32 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/axgle/mahonia"
 	"github.com/esrrhs/go-engine/src/loggo"
-	"net/http"
+	"github.com/esrrhs/go-engine/src/node"
+	"golang.org/x/net/html"
 	"strings"
 )
 
-func simplecrawl(ui *URLInfo) *PageInfo {
+func puppeteercrawl(ui *URLInfo, crawlTimeout int) *PageInfo {
 
 	url := ui.Url
-	loggo.Info("start simple crawl %v", url)
+	loggo.Info("start puppeteer crawl %v", url)
 
-	res, err := http.Get(url)
-	if err != nil {
-		loggo.Warn("simple crawl http Get fail %v %v", url, err)
+	ret := node.Run("puppeteer_crawl.js", crawlTimeout, url)
+	if len(ret) <= 0 {
+		loggo.Warn("puppeteer crawl http fail %v", url)
 		return nil
 	}
-	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		loggo.Warn("simple crawl http StatusCode fail %v %v", url, res.StatusCode)
+	r := strings.NewReader(ret)
+
+	root, err := html.Parse(r)
+	if err != nil {
+		loggo.Warn("puppeteer crawl html Parse fail %v %v", url, err)
 		return nil
 	}
 
 	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		loggo.Warn("simple crawl http NewDocumentFromReader fail %v %v", url, err)
-		return nil
-	}
+	doc := goquery.NewDocumentFromNode(root)
 
 	gb2312 := false
 	doc.Find("META").Each(func(i int, s *goquery.Selection) {
@@ -52,7 +51,7 @@ func simplecrawl(ui *URLInfo) *PageInfo {
 				enc := mahonia.NewDecoder("gbk")
 				pg.Title = enc.ConvertString(pg.Title)
 			}
-			//loggo.Info("simple simple crawl title %v", pg.Title)
+			//loggo.Info("puppeteer crawl title %v", pg.Title)
 		}
 	})
 
@@ -70,7 +69,7 @@ func simplecrawl(ui *URLInfo) *PageInfo {
 				href = enc.ConvertString(href)
 				name = enc.ConvertString(name)
 			}
-			//loggo.Info("simple simple crawl link %v %v %v %v", i, pg.Title, name, href)
+			//loggo.Info("puppeteer crawl link %v %v %v %v", i, pg.Title, name, href)
 
 			if len(href) > 0 {
 				pgl := PageLinkInfo{URLInfo{href, ui.Deps + 1}, name}
@@ -81,7 +80,7 @@ func simplecrawl(ui *URLInfo) *PageInfo {
 
 	//if len(pg.Son) == 0 {
 	//	html, _ := doc.Html()
-	//	loggo.Warn("simple simple crawl no link %v html:\n%v", url, html)
+	//	loggo.Warn("puppeteer crawl no link %v html:\n%v", url, html)
 	//}
 
 	return &pg

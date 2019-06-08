@@ -15,8 +15,6 @@ var gdb *sql.DB
 
 func Load() error {
 
-	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "dht", 7})
-
 	loggo.Info("sqlite3 Load start")
 
 	db, err := sql.Open("sqlite3", "./dht.db")

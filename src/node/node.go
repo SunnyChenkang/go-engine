@@ -40,12 +40,19 @@ func Ini() {
 }
 
 func Run(script string, timeout int, param ...string) string {
+	if len(gNodeDir) <= 0 {
+		Ini()
+		if len(gNodeDir) <= 0 {
+			loggo.Error("node Run no node dir %v %v %v", script, timeout, fmt.Sprint(param))
+			return ""
+		}
+	}
 	d := time.Now().Add(time.Duration(timeout) * time.Second)
 	ctx, cancel := context.WithDeadline(context.Background(), d)
 
 	defer cancel() // releases resources if slowOperation completes before timeout elapses
 
-	loggo.Info("node Run start %v %v ", script, fmt.Sprint(param))
+	loggo.Info("node Run start %v %v %v ", script, timeout, fmt.Sprint(param))
 
 	tmp := gNodeDir + "/" + script
 	tmp = filepath.Clean(tmp)

@@ -11,11 +11,13 @@ import (
 )
 
 type Config struct {
-	Threadnum   int
-	Buffersize  int
-	Sleeptimems int
-	Deps        int
-	FocusSpider bool
+	Threadnum    int
+	Buffersize   int
+	Sleeptimems  int
+	Deps         int
+	FocusSpider  bool
+	Crawlfunc    string // simple,puppeteer
+	CrawlTimeout int
 }
 
 type DBInfo struct {
@@ -88,7 +90,8 @@ func Start(db *DB, config Config, url string) {
 	var jobsCrawlerFail int32
 
 	for i := 0; i < config.Threadnum; i++ {
-		go Crawler(jbd, dbd, config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail)
+		go Crawler(jbd, dbd, config, &jobs, crawl, parse, &jobsCrawlerTotal, &jobsCrawlerFail,
+			config.Crawlfunc, config.CrawlTimeout)
 		go Parser(jbd, dbd, config, &jobs, crawl, parse, save)
 		go Saver(db, &jobs, save)
 	}
@@ -119,7 +122,8 @@ func Start(db *DB, config Config, url string) {
 	loggo.Info("Spider end %v %v", GetSize(db), GetDoneSize(dbd))
 }
 
-func Crawler(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo, jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32) {
+func Crawler(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl <-chan *URLInfo, parse chan<- *PageInfo,
+	jobsCrawlerTotal *int32, jobsCrawlerTotalFail *int32, crawlfunc string, crawlTimeout int) {
 	loggo.Info("Crawler start")
 	for job := range crawl {
 		//loggo.Info("receive crawl job %v", job)
@@ -129,7 +133,12 @@ func Crawler(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl <-chan *
 			InsertSpiderDone(dbd, job.Url)
 			if job.Deps < config.Deps {
 				atomic.AddInt32(jobsCrawlerTotal, 1)
-				pg := simplecrawl(job)
+				var pg *PageInfo
+				if crawlfunc == "simple" {
+					pg = simplecrawl(job)
+				} else if crawlfunc == "puppeteer" {
+					pg = puppeteercrawl(job, crawlTimeout)
+				}
 				if pg != nil {
 					loggo.Info("crawl job ok %v %v %v", job.Url, pg.Title, len(pg.Son))
 					atomic.AddInt32(jobs, 1)

@@ -11,7 +11,8 @@ import (
 
 func Load() error {
 
-	loggo.Ini(loggo.Config{loggo.LEVEL_DEBUG, "test", 7})
+	loggo.Info("texas Load start")
+
 	err := LoadNormalColor()
 	if err != nil {
 		return err

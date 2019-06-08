@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/esrrhs/go-engine/src/node"
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
 	"loggo"
-	"socketgo"
 	"spider"
 	"texas"
 )
@@ -22,19 +21,14 @@ func main() {
 	dbconfig.Addr = "192.168.1.115:4406"
 
 	dsn := dbconfig.FormatDSN()
-	spider.Load(dsn, 100)
 
-	c := socketgo.LuConfig{}
-	socketgo.New(&c)
-
-	d := texas.StrToBytes("黑3,梅A,方10,鬼")
-	loggo.Info("%v", texas.BytesToStr(d))
-
-	config := spider.Config{1, 100, 100, 1, true}
-	//entry := "https://ygdy8.com/html/gndy/dyzz/20190520/58618.html"
+	node.Ini()
+	config := spider.Config{1, 100, 100, 1, true,
+		"puppeteer", 60}
+	entry := "http://bt.hliang.com/show-5629a46fbbc48454e04cb41cb5b25b7a4d7824d7.html"
 	//entry := "http://www.csdn.net"
 	//entry := "https://www.80ying.com"
-	entry := "http://www.esrrhs.xyz"
+	//entry := "http://www.esrrhs.xyz"
 	db := spider.Load(dsn, 100)
 	spider.Start(db, config, entry)
 
