@@ -3,7 +3,7 @@ package node
 import (
 	"context"
 	"fmt"
-	"loggo"
+	"github.com/esrrhs/go-engine/src/loggo"
 	"os"
 	"os/exec"
 	"path/filepath"
