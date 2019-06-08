@@ -1,0 +1,55 @@
+[INFO] [2019-05-23T00:49:44+08:00] [F:/project/go-engine/src/spider/db.go:48] [spider.Load] sqlite3 Load start
+[INFO] [2019-05-23T00:49:44+08:00] [F:/project/go-engine/src/spider/db.go:111] [spider.Load] sqlite3 size 0
+[INFO] [2019-05-23T00:49:44+08:00] [F:/project/go-engine/src/spider/spider.go:44] [spider.Start] Spider Start  http://www.esrrhs.xyz
+[INFO] [2019-05-23T00:49:44+08:00] [F:/project/go-engine/src/spider/db.go:120] [spider.LoadJob] sqlite3 Load Job start
+[INFO] [2019-05-23T00:49:45+08:00] [F:/project/go-engine/src/spider/db.go:179] [spider.LoadJob] sqlite3 Job size 0
+[INFO] [2019-05-23T00:49:46+08:00] [F:/project/go-engine/src/spider/db.go:186] [spider.LoadDone] sqlite3 Load Done start
+[INFO] [2019-05-23T00:49:46+08:00] [F:/project/go-engine/src/spider/db.go:240] [spider.LoadDone] sqlite3 size 1
+[INFO] [2019-05-23T00:49:46+08:00] [F:/project/go-engine/src/spider/db.go:300] [spider.InsertSpiderJob] InsertSpiderJob http://www.esrrhs.xyz size 1
+[INFO] [2019-05-23T00:49:47+08:00] [F:/project/go-engine/src/spider/db.go:277] [spider.PopSpiderJob] PopSpiderJob http://www.esrrhs.xyz http://www.esrrhs.xyz 0
+[INFO] [2019-05-23T00:49:47+08:00] [F:/project/go-engine/src/spider/spider.go:151] [spider.Parser] Parser start
+[INFO] [2019-05-23T00:49:47+08:00] [F:/project/go-engine/src/spider/spider.go:249] [spider.Saver] Saver start
+[INFO] [2019-05-23T00:49:47+08:00] [F:/project/go-engine/src/spider/spider.go:123] [spider.Crawler] Crawler start
+[INFO] [2019-05-23T00:49:47+08:00] [F:/project/go-engine/src/spider/db.go:314] [spider.InsertSpiderDone] InsertSpiderDone http://www.esrrhs.xyz size 1
+[INFO] [2019-05-23T00:49:47+08:00] [F:/project/go-engine/src/spider/simplecrawl.go:14] [spider.simplecrawl] start crawl http://www.esrrhs.xyz
+[INFO] [2019-05-23T00:49:48+08:00] [F:/project/go-engine/src/spider/spider.go:134] [spider.Crawler] crawl job ok http://www.esrrhs.xyz 开心每一天 12
+[INFO] [2019-05-23T00:51:33+08:00] [F:/project/go-engine/src/spider/db.go:48] [spider.Load] sqlite3 Load start
+[INFO] [2019-05-23T00:51:33+08:00] [F:/project/go-engine/src/spider/db.go:111] [spider.Load] sqlite3 size 0
+[INFO] [2019-05-23T00:51:33+08:00] [F:/project/go-engine/src/spider/spider.go:44] [spider.Start] Spider Start  http://www.esrrhs.xyz
+[INFO] [2019-05-23T00:51:34+08:00] [F:/project/go-engine/src/spider/db.go:120] [spider.LoadJob] sqlite3 Load Job start
+[INFO] [2019-05-23T00:51:34+08:00] [F:/project/go-engine/src/spider/db.go:179] [spider.LoadJob] sqlite3 Job size 0
+[INFO] [2019-05-23T00:51:34+08:00] [F:/project/go-engine/src/spider/db.go:186] [spider.LoadDone] sqlite3 Load Done start
+[INFO] [2019-05-23T00:51:34+08:00] [F:/project/go-engine/src/spider/db.go:240] [spider.LoadDone] sqlite3 size 1
+[INFO] [2019-05-23T00:51:34+08:00] [F:/project/go-engine/src/spider/db.go:300] [spider.InsertSpiderJob] InsertSpiderJob http://www.esrrhs.xyz size 1
+[INFO] [2019-05-23T00:51:35+08:00] [F:/project/go-engine/src/spider/db.go:277] [spider.PopSpiderJob] PopSpiderJob http://www.esrrhs.xyz http://www.esrrhs.xyz 0
+[INFO] [2019-05-23T00:51:35+08:00] [F:/project/go-engine/src/spider/spider.go:249] [spider.Saver] Saver start
+[INFO] [2019-05-23T00:51:35+08:00] [F:/project/go-engine/src/spider/spider.go:123] [spider.Crawler] Crawler start
+[INFO] [2019-05-23T00:51:35+08:00] [F:/project/go-engine/src/spider/spider.go:151] [spider.Parser] Parser start
+[INFO] [2019-05-23T00:51:36+08:00] [F:/project/go-engine/src/spider/db.go:314] [spider.InsertSpiderDone] InsertSpiderDone http://www.esrrhs.xyz size 1
+[INFO] [2019-05-23T00:51:36+08:00] [F:/project/go-engine/src/spider/simplecrawl.go:14] [spider.simplecrawl] start crawl http://www.esrrhs.xyz
+[INFO] [2019-05-23T00:51:36+08:00] [F:/project/go-engine/src/spider/spider.go:134] [spider.Crawler] crawl job ok http://www.esrrhs.xyz 开心每一天 12
+[INFO] [2019-05-23T00:51:37+08:00] [F:/project/go-engine/src/spider/spider.go:113] [spider.Start] Spider jobs done crawl 1, failed 0
+[INFO] [2019-05-23T00:51:37+08:00] [F:/project/go-engine/src/spider/spider.go:147] [spider.Crawler] Crawler end
+[INFO] [2019-05-23T00:51:37+08:00] [F:/project/go-engine/src/spider/spider.go:245] [spider.Parser] Parser end
+[INFO] [2019-05-23T00:51:37+08:00] [F:/project/go-engine/src/spider/spider.go:259] [spider.Saver] Saver end
+[INFO] [2019-05-23T00:51:37+08:00] [F:/project/go-engine/src/spider/spider.go:119] [spider.Start] Spider end 0 1
+[INFO] [2019-05-23T00:53:39+08:00] [F:/project/go-engine/src/spider/db.go:48] [spider.Load] sqlite3 Load start
+[INFO] [2019-05-23T00:53:39+08:00] [F:/project/go-engine/src/spider/db.go:111] [spider.Load] sqlite3 size 0
+[INFO] [2019-05-23T00:53:39+08:00] [F:/project/go-engine/src/spider/spider.go:44] [spider.Start] Spider Start  http://www.esrrhs.xyz
+[INFO] [2019-05-23T00:53:40+08:00] [F:/project/go-engine/src/spider/db.go:120] [spider.LoadJob] sqlite3 Load Job start
+[INFO] [2019-05-23T00:53:40+08:00] [F:/project/go-engine/src/spider/db.go:179] [spider.LoadJob] sqlite3 Job size 0
+[INFO] [2019-05-23T00:53:40+08:00] [F:/project/go-engine/src/spider/db.go:186] [spider.LoadDone] sqlite3 Load Done start
+[INFO] [2019-05-23T00:53:40+08:00] [F:/project/go-engine/src/spider/db.go:240] [spider.LoadDone] sqlite3 size 1
+[INFO] [2019-05-23T00:53:40+08:00] [F:/project/go-engine/src/spider/db.go:300] [spider.InsertSpiderJob] InsertSpiderJob http://www.esrrhs.xyz size 1
+[INFO] [2019-05-23T00:53:41+08:00] [F:/project/go-engine/src/spider/db.go:277] [spider.PopSpiderJob] PopSpiderJob http://www.esrrhs.xyz http://www.esrrhs.xyz 0
+[INFO] [2019-05-23T00:53:41+08:00] [F:/project/go-engine/src/spider/spider.go:151] [spider.Parser] Parser start
+[INFO] [2019-05-23T00:53:41+08:00] [F:/project/go-engine/src/spider/spider.go:123] [spider.Crawler] Crawler start
+[INFO] [2019-05-23T00:53:41+08:00] [F:/project/go-engine/src/spider/spider.go:249] [spider.Saver] Saver start
+[INFO] [2019-05-23T00:53:42+08:00] [F:/project/go-engine/src/spider/db.go:314] [spider.InsertSpiderDone] InsertSpiderDone http://www.esrrhs.xyz size 1
+[INFO] [2019-05-23T00:53:42+08:00] [F:/project/go-engine/src/spider/simplecrawl.go:14] [spider.simplecrawl] start crawl http://www.esrrhs.xyz
+[INFO] [2019-05-23T00:53:42+08:00] [F:/project/go-engine/src/spider/spider.go:134] [spider.Crawler] crawl job ok http://www.esrrhs.xyz 开心每一天 12
+[INFO] [2019-05-23T00:53:44+08:00] [F:/project/go-engine/src/spider/spider.go:113] [spider.Start] Spider jobs done crawl 1, failed 0
+[INFO] [2019-05-23T00:53:44+08:00] [F:/project/go-engine/src/spider/spider.go:147] [spider.Crawler] Crawler end
+[INFO] [2019-05-23T00:53:44+08:00] [F:/project/go-engine/src/spider/spider.go:119] [spider.Start] Spider end 0 1
+[INFO] [2019-05-23T00:53:44+08:00] [F:/project/go-engine/src/spider/spider.go:245] [spider.Parser] Parser end
+[INFO] [2019-05-23T00:53:44+08:00] [F:/project/go-engine/src/spider/spider.go:259] [spider.Saver] Saver end
