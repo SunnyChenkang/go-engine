@@ -26,7 +26,7 @@ func Ini() {
 
 	dir := ""
 	for _, p := range gpaths {
-		tmp := p + "/node/" + sysType + "/"
+		tmp := p + "/src/github.com/esrrhs/go-engine/node/" + sysType + "/node_modules/"
 		tmp = filepath.Clean(tmp)
 		tmp = filepath.ToSlash(tmp)
 		if _, err := os.Stat(tmp); !os.IsNotExist(err) {
