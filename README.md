@@ -14,6 +14,6 @@ go语言开发通用代码库
 ## 依赖
 * 设置GOPATH ``export GOPATH=$HOME/go``
 * 安装nodejs
-* 安装git-lfs
+* 安装git-lfs https://packagecloud.io/github/git-lfs/install#bash-rpm
 
 
