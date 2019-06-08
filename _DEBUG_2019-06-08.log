@@ -1,2 +1,0 @@
-[INFO] [2019-06-08T16:31:33+08:00] [F:/project/go-engine/src/spider/db.go:46] [spider.Load] sqlite3 Load start
-[INFO] [2019-06-08T16:31:34+08:00] [F:/project/go-engine/src/spider/db.go:126] [spider.Load] mysql size 1761535
