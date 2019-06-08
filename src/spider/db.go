@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 )
 
 type DB struct {
@@ -40,72 +41,89 @@ type DoneDB struct {
 	gHasDoneStmt    *sql.Stmt
 }
 
-func Load() *DB {
+func Load(dsn string, conn int) *DB {
 
 	loggo.Info("sqlite3 Load start")
 
-	gdb, err := sql.Open("sqlite3", "./spider.db")
+	gdb, err := sql.Open("mysql", dsn)
 	if err != nil {
-		loggo.Error("open sqlite3 fail %v", err)
+		loggo.Error("open mysql fail %v", err)
 		return nil
 	}
+
+	err = gdb.Ping()
+	if err != nil {
+		loggo.Error("open mysql fail %v", err)
+		return nil
+	}
+
+	gdb.SetConnMaxLifetime(0)
+	gdb.SetMaxIdleConns(conn)
+	gdb.SetMaxOpenConns(conn)
 
 	ret := new(DB)
 
 	ret.gdb = gdb
 
-	gdb.Exec("CREATE TABLE  IF NOT EXISTS [link_info](" +
-		"[title] TEXT NOT NULL," +
-		"[name] TEXT NOT NULL," +
-		"[url] TEXT NOT NULL," +
-		"[time] DATETIME NOT NULL," +
-		"PRIMARY KEY([url]) ON CONFLICT IGNORE);")
-
-	//gdb.Exec("DROP TABLE IF EXISTS link_job_info;")
-
-	//gdb.Exec("DROP TABLE IF EXISTS link_done_info;")
-
-	////
-
-	stmt, err := gdb.Prepare("insert into link_info(title, name, url, time) values(?, ?, ?, DATETIME())")
+	_, err = gdb.Exec("CREATE DATABASE IF NOT EXISTS spider")
 	if err != nil {
-		loggo.Error("Prepare sqlite3 fail %v", err)
+		loggo.Error("CREATE DATABASE fail %v", err)
+		return nil
+	}
+
+	_, err = gdb.Exec("CREATE TABLE  IF NOT EXISTS spider.link_info(" +
+		"url VARCHAR(200)  NOT NULL ," +
+		"title VARCHAR(200) NOT NULL," +
+		"name VARCHAR(200) NOT NULL," +
+		"time DATETIME NOT NULL," +
+		"PRIMARY KEY(url)," +
+		"INDEX `time`(`time`) USING BTREE" +
+		");")
+	if err != nil {
+		loggo.Error("CREATE TABLE fail %v", err)
+		return nil
+	}
+
+	stmt, err := gdb.Prepare("insert IGNORE  into spider.link_info(title, name, url, time) values(?, ?, ?, NOW())")
+	if err != nil {
+		loggo.Error("Prepare mysql fail %v", err)
 		return nil
 	}
 	ret.gInsertStmt = stmt
 
-	stmt, err = gdb.Prepare("select max(rowid) as ret from link_info")
+	stmt, err = gdb.Prepare("select count(*) as ret from spider.link_info")
 	if err != nil {
-		loggo.Error("HasDone Prepare sqlite3 fail %v", err)
+		loggo.Error("HasDone Prepare mysql fail %v", err)
 		return nil
 	}
 	ret.gSizeStmt = stmt
 
-	stmt, err = gdb.Prepare("select title,name,url from link_info order by time desc limit 0, ?")
+	stmt, err = gdb.Prepare("select title,name,url from spider.link_info order by time desc limit 0, ?")
 	if err != nil {
-		loggo.Error("Prepare sqlite3 fail %v", err)
+		loggo.Error("Prepare mysql fail %v", err)
 		return nil
 	}
 	ret.gLastStmt = stmt
 
-	stmt, err = gdb.Prepare("select title,name,url from link_info where name like ? or title like ?")
+	stmt, err = gdb.Prepare("select title,name,url from spider.link_info where name like ? or title like ? limit 0,10000")
 	if err != nil {
-		loggo.Error("Prepare sqlite3 fail %v", err)
+		loggo.Error("Prepare mysql fail %v", err)
 		return nil
 	}
 	ret.gFindStmt = stmt
 
-	stmt, err = gdb.Prepare("delete from link_info where date('now', '-30 day') > date(time)")
+	stmt, err = gdb.Prepare("delete from spider.link_info where (TO_DAYS(NOW()) - TO_DAYS(time))>=30")
 	if err != nil {
-		loggo.Error("Prepare sqlite3 fail %v", err)
+		loggo.Error("Prepare mysql fail %v", err)
 		return nil
 	}
 	ret.gDeleteStmt = stmt
 
 	////
+	go DeleteOldSpider(ret)
 
 	num := GetSize(ret)
-	loggo.Info("sqlite3 size %v", num)
+	loggo.Info("mysql size %v", num)
 
 	return ret
 }
@@ -309,6 +327,18 @@ func InsertSpiderDone(db *DoneDB, url string) {
 	loggo.Info("InsertSpiderDone %v size %v", url, num)
 }
 
+func DeleteOldSpider(db *DB) {
+	for {
+		db.lock.Lock()
+		db.gDeleteStmt.Exec()
+		db.lock.Unlock()
+
+		loggo.Info("DeleteOldSpider %v", GetSize(db))
+
+		time.Sleep(time.Hour)
+	}
+}
+
 func InsertSpider(db *DB, title string, name string, url string) {
 
 	db.lock.Lock()
@@ -316,10 +346,6 @@ func InsertSpider(db *DB, title string, name string, url string) {
 	if err != nil {
 		loggo.Error("InsertSpider insert sqlite3 fail %v %v", url, err)
 	}
-	db.lock.Unlock()
-
-	db.lock.Lock()
-	db.gDeleteStmt.Exec("delete from link_info where date('now', '-30 day') > date(time)")
 	db.lock.Unlock()
 
 	loggo.Info("InsertSpider %v %v %v", title, name, url)

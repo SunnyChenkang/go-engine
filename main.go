@@ -1,8 +1,9 @@
 package main
 
 import (
+	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 	"loggo"
-	"rbuffergo"
 	"socketgo"
 	"spider"
 	"texas"
@@ -14,7 +15,14 @@ func main() {
 
 	loggo.Info("start")
 
-	rbuffergo.New(1, true)
+	dbconfig := mysql.NewConfig()
+	dbconfig.User = "root"
+	dbconfig.Passwd = "123123"
+	dbconfig.Net = "tcp"
+	dbconfig.Addr = "192.168.1.115:4406"
+
+	dsn := dbconfig.FormatDSN()
+	spider.Load(dsn, 100)
 
 	c := socketgo.LuConfig{}
 	socketgo.New(&c)
@@ -27,7 +35,7 @@ func main() {
 	//entry := "http://www.csdn.net"
 	//entry := "https://www.80ying.com"
 	entry := "http://www.esrrhs.xyz"
-	db := spider.Load()
+	db := spider.Load(dsn, 100)
 	spider.Start(db, config, entry)
 
 	texas.Load()
