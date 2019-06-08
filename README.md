@@ -14,6 +14,6 @@ go语言开发通用代码库
 ## 依赖
 * 设置GOPATH ``export GOPATH=$HOME/go``
 * 安装nodejs
-* 安装git-lfs https://packagecloud.io/github/git-lfs/install#bash-rpm
+* 安装git-lfs，参考https://github.com/git-lfs/git-lfs ，安装完之后，``git lfs track 大文件`` 然后正常commit push，拉取pull之后，再执行 ``git lfs pull``
 
 
