@@ -5,9 +5,16 @@ var args = process.argv.splice(2);
 
 (async () => {
   const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(args[0]);
-  console.log(await page.content());
-  
-  await browser.close();
+  try {
+    const page = await browser.newPage();
+    await page.goto(args[0]);
+    console.log(await page.content());
+  } 
+  catch(e) {
+    console.log(e)
+    process.exit()
+  }
+  finally {
+    browser.close()
+  }
 })();
