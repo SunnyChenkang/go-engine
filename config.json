@@ -1,0 +1,7 @@
+{
+  "extract": [
+    "/node/linux/node_modules/puppeteer/.local-chromium/linux-662092/chrome-linux/chrome",
+	"/data/texas/texas_data_opt_5.txt",
+	"/data/texas/texas_data_opt_6.txt"
+  ]
+}

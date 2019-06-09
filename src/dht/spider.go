@@ -19,8 +19,7 @@ func Load() error {
 
 	db, err := sql.Open("sqlite3", "./dht.db")
 	if err != nil {
-		loggo.Error("open sqlite3 fail %v", err)
-		return err
+		panic(err)
 	}
 	gdb = db
 

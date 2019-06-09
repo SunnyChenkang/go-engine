@@ -23,6 +23,9 @@ func main() {
 	dsn := dbconfig.FormatDSN()
 
 	common.Ini()
+
+	texas.Load()
+
 	config := spider.Config{1, 100, 100, 1, true,
 		"puppeteer", 60}
 	entry := "http://bt.hliang.com/show-4a1fa9b7bb73346774d2603b63f3c12b2e6581d4.html"
@@ -31,8 +34,6 @@ func main() {
 	//entry := "http://www.esrrhs.xyz"
 	db := spider.Load(dsn, 100)
 	spider.Start(db, config, entry)
-
-	texas.Load()
 
 	max, trans := texas.GetMax("方8,红J,方6,红3,方5,红A,方4")
 	loggo.Info("max %v, trans %v", max, trans)

@@ -2,57 +2,64 @@ package texas
 
 import (
 	"bufio"
+	"github.com/esrrhs/go-engine/src/common"
 	"github.com/esrrhs/go-engine/src/loggo"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
-func Load() error {
+func Load() {
 
 	loggo.Info("texas Load start")
 
 	err := LoadNormalColor()
 	if err != nil {
-		return err
+		panic(err)
 	}
 	err = LoadProbility()
 	if err != nil {
-		return err
+		panic(err)
 	}
-	return nil
 }
 func LoadNormalColor() error {
-	err := LoadColor("texas_data_color.txt")
+
+	path := common.GetDataDir() + "/texas/"
+
+	err := LoadColor(path + "texas_data_color.txt")
 	if err != nil {
 		return err
 	}
-	err = LoadNormal("texas_data_normal.txt")
+	err = LoadNormal(path + "texas_data_normal.txt")
 	if err != nil {
 		return err
 	}
-	err = LoadColor("texas_data_extra_color_6.txt")
+	err = LoadColor(path + "texas_data_extra_color_6.txt")
 	if err != nil {
 		return err
 	}
-	err = LoadNormal("texas_data_extra_normal_6.txt")
+	err = LoadNormal(path + "texas_data_extra_normal_6.txt")
 	if err != nil {
 		return err
 	}
-	err = LoadColor("texas_data_extra_color_5.txt")
+	err = LoadColor(path + "texas_data_extra_color_5.txt")
 	if err != nil {
 		return err
 	}
-	err = LoadNormal("texas_data_extra_normal_5.txt")
+	err = LoadNormal(path + "texas_data_extra_normal_5.txt")
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func LoadProbility() error {
+
+	path := common.GetDataDir() + "/texas/"
+
 	for i := 6; i >= 2; i-- {
-		err := loadProbility(i, "texas_data_opt_"+strconv.Itoa(i)+".txt")
+		err := loadProbility(i, path+"texas_data_opt_"+strconv.Itoa(i)+".txt")
 		if err != nil {
 			return err
 		}
@@ -80,6 +87,9 @@ var probilityMap [7]map[int64]ProbilityData
 var optprobilityMap [7]map[int64]ProbilityData
 
 func loadProbility(i int, file string) error {
+
+	file = filepath.Clean(file)
+	file = filepath.ToSlash(file)
 
 	loggo.Info("start loadProbility %v", file)
 
@@ -127,6 +137,10 @@ func loadProbility(i int, file string) error {
 }
 
 func LoadNormal(file string) error {
+
+	file = filepath.Clean(file)
+	file = filepath.ToSlash(file)
+
 	loggo.Info("start LoadNormal %v", file)
 
 	if normalMap == nil {
@@ -167,6 +181,10 @@ func LoadNormal(file string) error {
 }
 
 func LoadColor(file string) error {
+
+	file = filepath.Clean(file)
+	file = filepath.ToSlash(file)
+
 	loggo.Info("start LoadColor %v", file)
 
 	if colorMap == nil {
