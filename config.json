@@ -1,4 +1,5 @@
 {
+  "init" : ["init_linux.sh"],
   "extract": [
     "/node/linux/node_modules/puppeteer/.local-chromium/linux-662092/chrome-linux/chrome",
 	"/data/texas/texas_data_opt_5.txt",

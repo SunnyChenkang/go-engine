@@ -6,6 +6,7 @@ import (
 	"github.com/esrrhs/go-engine/src/loggo"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -63,13 +64,43 @@ func Ini() {
 
 	loadConfig()
 	extract()
+	InitShell()
 }
 
 type EngineConfiguration struct {
 	Extract []string
+	Init    []string
 }
 
 var gEngineConfiguration EngineConfiguration
+
+func InitShell() {
+	sysType := runtime.GOOS
+
+	for _, f := range gEngineConfiguration.Init {
+		if strings.Contains(f, sysType) {
+			InitShellFile(f)
+		}
+	}
+}
+
+func InitShellFile(f string) {
+
+	file := gEngineDir + "/" + f
+	file = filepath.Clean(file)
+	file = filepath.ToSlash(file)
+
+	loggo.Info("InitShellFile %v", file)
+
+	cmd := exec.Command("bash", file, gEngineDir)
+	out, err := cmd.CombinedOutput()
+	outstr := string(out)
+	if err != nil {
+		panic(err)
+	}
+
+	loggo.Info("InitShellFile ok %v %v", file, outstr)
+}
 
 func loadConfig() {
 	file := gEngineDir + "/" + "config.json"
