@@ -7,7 +7,7 @@ var args = process.argv.splice(2);
   const browser = await puppeteer.connect({browserWSEndpoint :args[1]});
   try {
     const page = await browser.newPage();
-    await page.goto(args[0]);
+    await page.goto(args[0], {waitUntil: 'domcontentloaded'});
     console.log(await page.content());
   } 
   catch(e) {
