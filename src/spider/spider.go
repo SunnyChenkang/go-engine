@@ -48,15 +48,20 @@ type URLInfo struct {
 
 func Ini() {
 	if runtime.GOOS == "linux" {
-		shell.Run(common.GetNodeDir()+"/close_chrome.sh", 60)
-		ret := shell.Run(common.GetNodeDir()+"/start_chrome.sh", 60, common.GetNodeDir())
-		ret = strings.TrimSpace(ret)
-		if len(ret) <= 0 {
+		go startChrome()
+		go getChrome()
+		for i := 0; i < 10; i++ {
+			if len(gSpiderData.chromeWSEndpoint) > 0 {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+
+		if len(gSpiderData.chromeWSEndpoint) <= 0 {
 			panic("spider start chrome fail")
 		}
-		gSpiderData.chromeWSEndpoint = ret
+
 		loggo.Info("spider start chrome %v", gSpiderData.chromeWSEndpoint)
-		go checkChrome()
 	}
 }
 
@@ -66,15 +71,27 @@ type SpiderData struct {
 
 var gSpiderData SpiderData
 
-func checkChrome() {
+func getChrome() {
+
 	for {
-		ret := shell.Run(common.GetNodeDir()+"/start_chrome.sh", 60, common.GetNodeDir())
+		ret := shell.Run(common.GetNodeDir()+"/get_chrome.sh", common.GetNodeDir())
 		ret = strings.TrimSpace(ret)
 		if len(ret) > 0 {
-			gSpiderData.chromeWSEndpoint = ret
-			loggo.Info("spider restart chrome %v", gSpiderData.chromeWSEndpoint)
+			if ret != gSpiderData.chromeWSEndpoint {
+				gSpiderData.chromeWSEndpoint = ret
+				loggo.Info("spider get chromeWSEndpoint %v", gSpiderData.chromeWSEndpoint)
+			}
 		}
-		time.Sleep(time.Minute)
+		time.Sleep(time.Second)
+	}
+}
+
+func startChrome() {
+	for {
+		shell.RunTimeout(common.GetNodeDir()+"/close_chrome.sh", 60)
+		loggo.Info("spider restart chrome ")
+		shell.Run(common.GetNodeDir()+"/start_chrome.sh", common.GetNodeDir())
+		time.Sleep(time.Second)
 	}
 }
 
