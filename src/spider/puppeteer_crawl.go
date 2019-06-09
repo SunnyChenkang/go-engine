@@ -16,7 +16,7 @@ func puppeteercrawl(ui *URLInfo, crawlTimeout int) *PageInfo {
 
 	ret := node.Run("puppeteer_crawl.js", true, crawlTimeout, url, gSpiderData.chromeWSEndpoint)
 	if len(ret) <= 0 {
-		loggo.Warn("puppeteer crawl http fail %v %v", url, url, gSpiderData.chromeWSEndpoint)
+		loggo.Warn("puppeteer crawl http fail %v %v", url, gSpiderData.chromeWSEndpoint)
 		return nil
 	}
 
