@@ -26,7 +26,7 @@ func Run(script string, timeout int, param ...string) string {
 	tmpparam = append(tmpparam, param...)
 
 	begin := time.Now()
-	cmd := exec.CommandContext(ctx, "sh", param...)
+	cmd := exec.CommandContext(ctx, "sh", tmpparam...)
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
