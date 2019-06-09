@@ -13,5 +13,5 @@ go语言开发通用代码库
 
 ## 依赖
 * 设置GOPATH ``export GOPATH=$HOME/go``
-* 安装nodejs
+* 安装nodejs，设置NODE_PATH ``export NODE_PATH=$GOPATH/src/github.com/esrrhs/go-engine/node/linux/node_modules/``
 

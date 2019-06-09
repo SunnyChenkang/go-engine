@@ -3,9 +3,11 @@ package spider
 import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/axgle/mahonia"
+	"github.com/esrrhs/go-engine/src/common"
 	"github.com/esrrhs/go-engine/src/loggo"
 	"github.com/esrrhs/go-engine/src/node"
 	"golang.org/x/net/html"
+	"path/filepath"
 	"strings"
 )
 
@@ -14,7 +16,11 @@ func puppeteercrawl(ui *URLInfo, crawlTimeout int) *PageInfo {
 	url := ui.Url
 	loggo.Info("start puppeteer crawl %v %v", url, gSpiderData.chromeWSEndpoint)
 
-	ret := node.Run("puppeteer_crawl.js", true, crawlTimeout, url, gSpiderData.chromeWSEndpoint)
+	tmp := common.GetNodeDir() + "/" + "puppeteer_crawl.js"
+	tmp = filepath.Clean(tmp)
+	tmp = filepath.ToSlash(tmp)
+
+	ret := node.Run(tmp, true, crawlTimeout, url, gSpiderData.chromeWSEndpoint)
 	if len(ret) <= 0 {
 		loggo.Warn("puppeteer crawl http fail %v %v", url, gSpiderData.chromeWSEndpoint)
 		return nil

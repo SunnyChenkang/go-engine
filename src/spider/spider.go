@@ -71,6 +71,10 @@ type SpiderData struct {
 
 var gSpiderData SpiderData
 
+func GetChromeWSEndpoint() string {
+	return gSpiderData.chromeWSEndpoint
+}
+
 func getChrome() {
 
 	for {

@@ -3,10 +3,8 @@ package node
 import (
 	"context"
 	"fmt"
-	"github.com/esrrhs/go-engine/src/common"
 	"github.com/esrrhs/go-engine/src/loggo"
 	"os/exec"
-	"path/filepath"
 	"time"
 )
 
@@ -21,12 +19,8 @@ func Run(script string, silent bool, timeout int, param ...string) string {
 		loggo.Info("node Run start %v %v %v ", script, timeout, fmt.Sprint(param))
 	}
 
-	tmp := common.GetNodeDir() + "/" + script
-	tmp = filepath.Clean(tmp)
-	tmp = filepath.ToSlash(tmp)
-
 	var tmpparam []string
-	tmpparam = append(tmpparam, tmp)
+	tmpparam = append(tmpparam, script)
 	tmpparam = append(tmpparam, param...)
 
 	begin := time.Now()
