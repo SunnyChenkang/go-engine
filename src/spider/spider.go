@@ -168,6 +168,11 @@ func Parser(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl chan<- *U
 	for job := range parse {
 		//loggo.Info("receive parse job %v %v", job.Title, job.UI.Url)
 
+		srcURL, err := url.Parse(job.UI.Url)
+		if err != nil {
+			continue
+		}
+
 		for _, s := range job.Son {
 			sonurl := s.UI.Url
 
@@ -176,6 +181,10 @@ func Parser(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl chan<- *U
 			}
 
 			if sonurl == "/" {
+				continue
+			}
+
+			if strings.Contains(sonurl, "javascript:void(0)") {
 				continue
 			}
 
@@ -206,42 +215,51 @@ func Parser(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl chan<- *U
 					continue
 				}
 
-				valid := false
 				if strings.HasPrefix(ss, "http://") || strings.HasPrefix(ss, "https://") {
-					valid = true
+
+				} else if strings.HasPrefix(ss, "/") {
+					sonurl = srcURL.Scheme + "://" + srcURL.Host + sonurl
+				} else {
+					dir := srcURL.Path
+
+					dirIndex := strings.LastIndex(dir, "/")
+					if dirIndex >= 0 {
+						dir = dir[0:dirIndex]
+					} else {
+						dir = ""
+					}
+					sonurl = srcURL.Scheme + "://" + srcURL.Host + dir + "/" + sonurl
+
+					mIndex := strings.Index(sonurl, "#")
+					if mIndex >= 0 {
+						sonurl = sonurl[0:mIndex]
+					}
 				}
 
-				if strings.HasPrefix(ss, "/") {
-					dstURL, dsterr := url.Parse(job.UI.Url)
-					if dsterr == nil {
-						tmp := strings.TrimRight(dstURL.Scheme+"://"+dstURL.Host, "/")
-						sonurl = tmp + sonurl
-						valid = true
-					}
+				_, err := url.Parse(sonurl)
+				if err != nil {
+					continue
 				}
 
 				var tmp *URLInfo
 
-				if valid {
-					finded := HasDone(dbd, sonurl)
-					if !finded {
-						if config.FocusSpider {
-							dstURL, dsterr := url.Parse(sonurl)
-							srcURL, srcerr := url.Parse(job.UI.Url)
+				finded := HasDone(dbd, sonurl)
+				if !finded {
+					if config.FocusSpider {
+						dstURL, dsterr := url.Parse(sonurl)
 
-							if dsterr == nil && srcerr == nil {
-								dstParams := strings.Split(dstURL.Host, ".")
-								srcParams := strings.Split(srcURL.Host, ".")
+						if dsterr == nil {
+							dstParams := strings.Split(dstURL.Host, ".")
+							srcParams := strings.Split(srcURL.Host, ".")
 
-								if len(dstParams) >= 2 && len(srcParams) >= 2 &&
-									dstParams[len(dstParams)-1] == srcParams[len(srcParams)-1] &&
-									dstParams[len(dstParams)-2] == srcParams[len(srcParams)-2] {
-									tmp = &URLInfo{sonurl, s.UI.Deps}
-								}
+							if len(dstParams) >= 2 && len(srcParams) >= 2 &&
+								dstParams[len(dstParams)-1] == srcParams[len(srcParams)-1] &&
+								dstParams[len(dstParams)-2] == srcParams[len(srcParams)-2] {
+								tmp = &URLInfo{sonurl, s.UI.Deps}
 							}
-						} else {
-							tmp = &URLInfo{sonurl, s.UI.Deps}
 						}
+					} else {
+						tmp = &URLInfo{sonurl, s.UI.Deps}
 					}
 				}
 
