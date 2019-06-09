@@ -9,12 +9,14 @@ import (
 	"time"
 )
 
-func Run(script string, param ...string) string {
+func Run(script string, silent bool, param ...string) string {
 
 	script = filepath.Clean(script)
 	script = filepath.ToSlash(script)
 
-	loggo.Info("shell Run start %v %v ", script, fmt.Sprint(param))
+	if !silent {
+		loggo.Info("shell Run start %v %v ", script, fmt.Sprint(param))
+	}
 
 	var tmpparam []string
 	tmpparam = append(tmpparam, script)
@@ -25,17 +27,21 @@ func Run(script string, param ...string) string {
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		loggo.Warn("shell Run fail %v %v", cmd.Args, outstr)
+		if !silent {
+			loggo.Warn("shell Run fail %v %v", cmd.Args, outstr)
+		}
 		return ""
 	}
 
-	loggo.Info("shell Run ok %v %v", cmd.Args, time.Now().Sub(begin))
-	loggo.Info("%v", outstr)
+	if !silent {
+		loggo.Info("shell Run ok %v %v", cmd.Args, time.Now().Sub(begin))
+		loggo.Info("%v", outstr)
+	}
 
 	return outstr
 }
 
-func RunTimeout(script string, timeout int, param ...string) string {
+func RunTimeout(script string, silent bool, timeout int, param ...string) string {
 
 	script = filepath.Clean(script)
 	script = filepath.ToSlash(script)
@@ -44,8 +50,9 @@ func RunTimeout(script string, timeout int, param ...string) string {
 	ctx, cancel := context.WithDeadline(context.Background(), d)
 
 	defer cancel() // releases resources if slowOperation completes before timeout elapses
-
-	loggo.Info("shell Run start %v %v %v ", script, timeout, fmt.Sprint(param))
+	if !silent {
+		loggo.Info("shell Run start %v %v %v ", script, timeout, fmt.Sprint(param))
+	}
 
 	var tmpparam []string
 	tmpparam = append(tmpparam, script)
@@ -56,12 +63,15 @@ func RunTimeout(script string, timeout int, param ...string) string {
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		loggo.Warn("shell Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
+		if !silent {
+			loggo.Warn("shell Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
+		}
 		return ""
 	}
 
-	loggo.Info("shell Run ok %v %v", cmd.Args, time.Now().Sub(begin))
-	loggo.Info("%v", outstr)
-
+	if !silent {
+		loggo.Info("shell Run ok %v %v", cmd.Args, time.Now().Sub(begin))
+		loggo.Info("%v", outstr)
+	}
 	return outstr
 }

@@ -74,7 +74,7 @@ var gSpiderData SpiderData
 func getChrome() {
 
 	for {
-		ret := shell.Run(common.GetNodeDir()+"/get_chrome.sh", common.GetNodeDir())
+		ret := shell.Run(common.GetNodeDir()+"/get_chrome.sh", true, common.GetNodeDir())
 		ret = strings.TrimSpace(ret)
 		if len(ret) > 0 {
 			if ret != gSpiderData.chromeWSEndpoint {
@@ -88,9 +88,9 @@ func getChrome() {
 
 func startChrome() {
 	for {
-		shell.RunTimeout(common.GetNodeDir()+"/close_chrome.sh", 60)
+		shell.RunTimeout(common.GetNodeDir()+"/close_chrome.sh", true, 60)
 		loggo.Info("spider restart chrome ")
-		shell.Run(common.GetNodeDir()+"/start_chrome.sh", common.GetNodeDir())
+		shell.Run(common.GetNodeDir()+"/start_chrome.sh", true, common.GetNodeDir())
 		time.Sleep(time.Second)
 	}
 }
