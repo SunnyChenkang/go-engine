@@ -25,7 +25,7 @@ func Run(script string, param ...string) string {
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		loggo.Warn("shell Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
+		loggo.Warn("shell Run fail %v %v", cmd.Args, outstr)
 		return ""
 	}
 
