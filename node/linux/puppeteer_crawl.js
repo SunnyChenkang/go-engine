@@ -5,15 +5,16 @@ var args = process.argv.splice(2);
 
 (async () => {
   const browser = await puppeteer.connect({browserWSEndpoint :args[1]});
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
-    await page.goto(args[0], {waitUntil: 'domcontentloaded'});
+    await page.goto(args[0], {waitUntil : 'domcontentloaded'});
     console.log(await page.content());
-  } 
+   }
   catch(e) {
     console.log(e)
-    process.exit()
   }
   finally {
+    await page.close()
+    browser.disconnect()
   }
 })();
