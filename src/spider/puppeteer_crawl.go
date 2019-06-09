@@ -12,11 +12,11 @@ import (
 func puppeteercrawl(ui *URLInfo, crawlTimeout int) *PageInfo {
 
 	url := ui.Url
-	loggo.Info("start puppeteer crawl %v", url)
+	loggo.Info("start puppeteer crawl %v %v", url, gSpiderData.chromeWSEndpoint)
 
-	ret := node.Run("puppeteer_crawl.js", crawlTimeout, url)
+	ret := node.Run("puppeteer_crawl.js", crawlTimeout, url, gSpiderData.chromeWSEndpoint)
 	if len(ret) <= 0 {
-		loggo.Warn("puppeteer crawl http fail %v", url)
+		loggo.Warn("puppeteer crawl http fail %v %v", url, url, gSpiderData.chromeWSEndpoint)
 		return nil
 	}
 

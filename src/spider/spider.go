@@ -1,8 +1,11 @@
 package spider
 
 import (
+	"github.com/esrrhs/go-engine/src/common"
 	"github.com/esrrhs/go-engine/src/loggo"
+	"github.com/esrrhs/go-engine/src/shell"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/tools/go/ssa/interp/testdata/src/runtime"
 	"math"
 	"net/url"
 	"strings"
@@ -41,6 +44,38 @@ type PageInfo struct {
 type URLInfo struct {
 	Url  string
 	Deps int
+}
+
+func Ini() {
+	if runtime.GOOS == "linux" {
+		shell.Run(common.GetNodeDir()+"/close_chrome.sh", 60)
+		ret := shell.Run(common.GetNodeDir()+"/start_chrome.sh", 60, common.GetNodeDir())
+		ret = strings.TrimSpace(ret)
+		if len(ret) <= 0 {
+			panic("spider start chrome fail")
+		}
+		gSpiderData.chromeWSEndpoint = ret
+		loggo.Info("spider start chrome %v", gSpiderData.chromeWSEndpoint)
+		go checkChrome()
+	}
+}
+
+type SpiderData struct {
+	chromeWSEndpoint string
+}
+
+var gSpiderData SpiderData
+
+func checkChrome() {
+	for {
+		ret := shell.Run(common.GetNodeDir()+"/start_chrome.sh", 60, common.GetNodeDir())
+		ret = strings.TrimSpace(ret)
+		if len(ret) > 0 {
+			gSpiderData.chromeWSEndpoint = ret
+			loggo.Info("spider restart chrome %v", gSpiderData.chromeWSEndpoint)
+		}
+		time.Sleep(time.Minute)
+	}
 }
 
 func Start(db *DB, config Config, url string) {

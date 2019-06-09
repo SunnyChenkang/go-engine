@@ -4,7 +4,7 @@ const process = require('process');
 var args = process.argv.splice(2);
 
 (async () => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.connect({browserWSEndpoint :args[1]});
   try {
     const page = await browser.newPage();
     await page.goto(args[0]);
