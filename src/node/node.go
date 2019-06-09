@@ -10,14 +10,16 @@ import (
 	"time"
 )
 
-func Run(script string, timeout int, param ...string) string {
+func Run(script string, silent bool, timeout int, param ...string) string {
 
 	d := time.Now().Add(time.Duration(timeout) * time.Second)
 	ctx, cancel := context.WithDeadline(context.Background(), d)
 
 	defer cancel() // releases resources if slowOperation completes before timeout elapses
 
-	loggo.Info("node Run start %v %v %v ", script, timeout, fmt.Sprint(param))
+	if !silent {
+		loggo.Info("node Run start %v %v %v ", script, timeout, fmt.Sprint(param))
+	}
 
 	tmp := common.GetNodeDir() + "/" + script
 	tmp = filepath.Clean(tmp)
@@ -32,12 +34,16 @@ func Run(script string, timeout int, param ...string) string {
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		loggo.Warn("node Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
+		if !silent {
+			loggo.Warn("node Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
+		}
 		return ""
 	}
 
-	loggo.Info("node Run ok %v %v", cmd.Args, time.Now().Sub(begin))
-	loggo.Info("%v", outstr)
+	if !silent {
+		loggo.Info("node Run ok %v %v", cmd.Args, time.Now().Sub(begin))
+		loggo.Info("%v", outstr)
+	}
 
 	return outstr
 }
