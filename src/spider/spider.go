@@ -236,7 +236,7 @@ func Parser(jbd *JobDB, dbd *DoneDB, config Config, jobs *int32, crawl chan<- *U
 				continue
 			}
 
-			if strings.Contains(sonurl, "javascript:void(0)") {
+			if strings.Contains(sonurl, "javascript:") {
 				continue
 			}
 
