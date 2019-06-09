@@ -308,9 +308,7 @@ func InsertSpiderJob(db *JobDB, url string, deps int) {
 	}
 	db.lock.Unlock()
 
-	num := GetJobSize(db)
-
-	loggo.Info("InsertSpiderJob %v size %v", url, num)
+	loggo.Info("InsertSpiderJob %v ", url)
 }
 
 func InsertSpiderDone(db *DoneDB, url string) {
@@ -322,9 +320,7 @@ func InsertSpiderDone(db *DoneDB, url string) {
 	}
 	db.lock.Unlock()
 
-	num := GetDoneSize(db)
-
-	loggo.Info("InsertSpiderDone %v size %v", url, num)
+	loggo.Info("InsertSpiderDone %v ", url)
 }
 
 func DeleteOldSpider(db *DB) {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/esrrhs/go-engine/src/node"
+	"github.com/esrrhs/go-engine/src/common"
+	"github.com/esrrhs/go-engine/src/loggo"
+	"github.com/esrrhs/go-engine/src/spider"
+	"github.com/esrrhs/go-engine/src/texas"
 	"github.com/go-sql-driver/mysql"
-	"loggo"
-	"spider"
-	"texas"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 
 	dsn := dbconfig.FormatDSN()
 
-	node.Ini()
+	common.Ini()
 	config := spider.Config{1, 100, 100, 1, true,
 		"puppeteer", 60}
 	entry := "http://bt.hliang.com/show-4a1fa9b7bb73346774d2603b63f3c12b2e6581d4.html"
