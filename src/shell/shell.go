@@ -27,9 +27,7 @@ func Run(script string, silent bool, param ...string) string {
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		if !silent {
-			loggo.Warn("shell Run fail %v %v", cmd.Args, outstr)
-		}
+		loggo.Warn("shell Run fail %v %v", cmd.Args, outstr)
 		return ""
 	}
 
@@ -63,9 +61,7 @@ func RunTimeout(script string, silent bool, timeout int, param ...string) string
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		if !silent {
-			loggo.Warn("shell Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
-		}
+		loggo.Warn("shell Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
 		return ""
 	}
 

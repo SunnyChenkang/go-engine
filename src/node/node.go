@@ -28,9 +28,7 @@ func Run(script string, silent bool, timeout int, param ...string) string {
 	out, err := cmd.CombinedOutput()
 	outstr := string(out)
 	if err != nil {
-		if !silent {
-			loggo.Warn("node Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
-		}
+		loggo.Warn("node Run fail %v %v %v", cmd.Args, outstr, ctx.Err())
 		return ""
 	}
 
