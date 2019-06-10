@@ -43,7 +43,7 @@ type DoneDB struct {
 
 func Load(dsn string, conn int) *DB {
 
-	loggo.Info("sqlite3 Load start")
+	loggo.Info("mysql Load start")
 
 	gdb, err := sql.Open("mysql", dsn)
 	if err != nil {
