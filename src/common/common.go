@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 var gEngineDir string
@@ -18,8 +19,20 @@ var gDataDir string
 
 func Ini() {
 
-	GOPATH := os.Getenv("GOPATH")
-	loggo.Info("GOPATH %v", GOPATH)
+	var GOPATH string
+	for i := 0; i < 100; i++ {
+		GOPATH = os.Getenv("GOPATH")
+		if len(GOPATH) > 0 {
+			loggo.Info("GOPATH %v", GOPATH)
+			break
+		} else {
+			loggo.Info("GOPATH empty, wait... %v", i)
+			time.Sleep(time.Second)
+		}
+	}
+	if len(GOPATH) <= 0 {
+		panic("need GOPATH")
+	}
 
 	gpaths := strings.Split(GOPATH, ";")
 
