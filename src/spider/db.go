@@ -5,7 +5,6 @@ import (
 	"github.com/esrrhs/go-engine/src/loggo"
 	_ "github.com/mattn/go-sqlite3"
 	"net/url"
-	"strings"
 	"sync"
 	"time"
 )
@@ -105,7 +104,7 @@ func Load(dsn string, conn int) *DB {
 	}
 	ret.gLastStmt = stmt
 
-	stmt, err = gdb.Prepare("select title,name,url from spider.link_info where name like ? or title like ? limit 0,10000")
+	stmt, err = gdb.Prepare("select title,name,url from spider.link_info where name like ? or title like ? limit 0,?")
 	if err != nil {
 		loggo.Error("Prepare mysql fail %v", err)
 		return nil
@@ -450,52 +449,34 @@ func Last(db *DB, n int) []FindData {
 	return ret
 }
 
-func Find(db *DB, str string) []FindData {
+func Find(db *DB, str string, max int) []FindData {
 
 	var ret []FindData
 
-	retmap := make(map[string]string)
+	db.lock.Lock()
 
-	strs := strings.Split(str, " ")
-
-	for _, s := range strs {
-
-		s = strings.TrimSpace(s)
-		if len(s) <= 0 {
-			continue
-		}
-
-		db.lock.Lock()
-
-		rows, err := db.gFindStmt.Query("%"+s+"%", "%"+s+"%")
-		if err != nil {
-			loggo.Error("Find Query sqlite3 fail %v", err)
-			db.lock.Unlock()
-			return ret
-		}
-		defer rows.Close()
-
-		for rows.Next() {
-
-			var title string
-			var name string
-			var url string
-			err = rows.Scan(&title, &name, &url)
-			if err != nil {
-				loggo.Error("Find Scan sqlite3 fail %v", err)
-			}
-
-			_, ok := retmap[url]
-			if ok {
-				continue
-			}
-			retmap[url] = name
-
-			ret = append(ret, FindData{title, name, url})
-		}
-
+	rows, err := db.gFindStmt.Query("%"+str+"%", "%"+str+"%", max)
+	if err != nil {
+		loggo.Error("Find Query sqlite3 fail %v", err)
 		db.lock.Unlock()
+		return ret
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		var title string
+		var name string
+		var url string
+		err = rows.Scan(&title, &name, &url)
+		if err != nil {
+			loggo.Error("Find Scan sqlite3 fail %v", err)
+		}
+
+		ret = append(ret, FindData{title, name, url})
+	}
+
+	db.lock.Unlock()
 
 	return ret
 }

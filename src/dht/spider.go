@@ -8,7 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/shiyanhui/dht"
 	"strconv"
-	"strings"
 )
 
 var gdb *sql.DB
@@ -190,43 +189,25 @@ func Last(n int) []FindData {
 	return ret
 }
 
-func Find(str string) []FindData {
+func Find(str string, max int) []FindData {
 	var ret []FindData
 
-	retmap := make(map[string]string)
+	rows, err := gdb.Query("select infohash,name from meta_info where name like '%" + str + "%' limit 0," + strconv.Itoa(max))
+	if err != nil {
+		loggo.Error("Query sqlite3 fail %v", err)
+	}
+	defer rows.Close()
 
-	strs := strings.Split(str, " ")
+	for rows.Next() {
 
-	for _, s := range strs {
-
-		s = strings.TrimSpace(s)
-		if len(s) <= 0 {
-			continue
-		}
-
-		rows, err := gdb.Query("select infohash,name from meta_info where name like '%" + s + "%' limit 0,10000")
+		var infohash string
+		var name string
+		err = rows.Scan(&infohash, &name)
 		if err != nil {
-			loggo.Error("Query sqlite3 fail %v", err)
+			loggo.Error("Scan sqlite3 fail %v", err)
 		}
-		defer rows.Close()
 
-		for rows.Next() {
-
-			var infohash string
-			var name string
-			err = rows.Scan(&infohash, &name)
-			if err != nil {
-				loggo.Error("Scan sqlite3 fail %v", err)
-			}
-
-			_, ok := retmap[infohash]
-			if ok {
-				continue
-			}
-			retmap[infohash] = name
-
-			ret = append(ret, FindData{infohash, name})
-		}
+		ret = append(ret, FindData{infohash, name})
 	}
 
 	return ret
