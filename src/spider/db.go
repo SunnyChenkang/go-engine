@@ -459,6 +459,12 @@ func Find(db *DB, str string) []FindData {
 	strs := strings.Split(str, " ")
 
 	for _, s := range strs {
+
+		s = strings.TrimSpace(s)
+		if len(s) <= 0 {
+			continue
+		}
+
 		db.lock.Lock()
 
 		rows, err := db.gFindStmt.Query("%"+s+"%", "%"+s+"%")
